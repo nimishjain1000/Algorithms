@@ -16,11 +16,11 @@ int main() {
         scanf("%d%d%d",&n,&c,&m);
         answer = 0;
         /** Write the code to compute the answer here. **/
-        w = n/c;
+        w = n/c; // w number of wrapper remain
         answer += w;
         do{
-        	n1 = w / m;
-        	n2 = w % m ;
+        	n1 = w / m; // n1 number of chocolate from wrapper
+        	n2 = w % m ;// n2 wrapper remain
         	answer += n1;
         }
         while( (w= n1+n2) >=m);
