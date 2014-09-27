@@ -34,10 +34,10 @@ int TrinarySearch(int a[], int n, int f)
 		right = end = n-1;
 	}
 	else{
-	int start = 0;
-	int end = n-1;
-	int left = gap;
-	int right = gap*2;
+	start = 0;
+	end = n-1;
+	left = gap;
+	right = gap*2;
 	}
 	while(left < right)
 	{
