@@ -96,7 +96,7 @@ int main() {
 		int i = TernarySearch(a,arraySize,x);
 		if(i>=0){
 			cout << "Found at :"<< i<<endl;
-		}else if(i==-1){
+		}else{
 			cout << "Not found !";
 		}
 		return 0;
