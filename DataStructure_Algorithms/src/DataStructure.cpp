@@ -29,8 +29,11 @@ int TernarySearch_Recursive(int a[],int x,int pos1,int pos2,int n){
 	return 0;
 }
 /**
- * Ternary Search Increase
+ * Ternary Search Increase.
  * @params a[],n,x
+ * @return :
+ * 				+ Not found(-1).
+ * 				+ Found (location in array).
  */
 int TernarySearch(int a[], int n, int x){
 	int left, right;
