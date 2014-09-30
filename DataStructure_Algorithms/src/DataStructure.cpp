@@ -29,22 +29,22 @@ int TernarySearch_Recursive(int a[],int x,int pos1,int pos2,int n){
 	return 0;
 }
 /**
- * Ternary Search
+ * Ternary Search Increase
  * @params a[],n,x
  */
 int TernarySearch(int a[], int n, int x){
-	int start,end,left, right;
+	int left, right;
+	int start=0;
+	int end=n-1;
 	int point = n / 3;     // Find the split point.
 		if(point <1){
-			start = left = 0;
-			right = end = n-1;
+			left = 0;
+			right = n-1;
 		}else{
-			start = 0;
-			end = n-1;
 			left = point;
 			right = point*2;
 		}
-		while(left < right)	{
+		while(left <= right)	{
 			point /= 3;
 			if(x > a[right]){
 				start = right ;
@@ -64,6 +64,16 @@ int TernarySearch(int a[], int n, int x){
 		}
 	return -1; // Not found !!
 }
+/*
+ * Binary Search Extend - N
+ * @params
+ */
+int NSearch(int a[],int n, int x,int type){
+	int start=0;
+	int end=n-1;
+	int split_point=n/type;
+	return -1;
+}
 /**
  * Main method
  */
@@ -74,6 +84,8 @@ int main() {
 	 */
 
 //		int a[]= {};
+//		int a[]= {1};
+//		int a[]= {1,2};
 //		int a[]= {1,2,3};
 //		int a[]= {1,2,3,4};
 //		int a[] = {1,2,3,4,5,6,7,8,9,10};
