@@ -58,25 +58,27 @@ int NSearch(int a[],int n, int x,int type){
 	int end=n-1;
 	int split_point = n/type;
 	int compare_point; // 1st compare point
-	while(split_point>=1){
-		int *list_of_compare_point=new int[n];
-			int count_list=0;
-			while(compare_point<=end-split_point){
-				list_of_compare_point[count_list]=compare_point;
-				compare_point+=split_point;
-				count_list++;
-			}
-			for(int i=count_list-1;i>0;i--){
-				if(a[list_of_compare_point[i]]==x){
-					return i;
-				}if(x>a[list_of_compare_point[i]] && x<end){
-					start=a[list_of_compare_point[i]];
-				}if(x<a[list_of_compare_point[i]]){
-					end=a[list_of_compare_point[i]];
-				}else if(x==start) {return start;}
-				 else if(x==end) {return end;}
-			}
-		split_point/=type;
+	while(start<=end){
+		while(split_point>=1){
+			int *list_of_compare_point=new int[n];
+				int count_list=0;
+				while(compare_point<=end-split_point){
+					list_of_compare_point[count_list]=compare_point;
+					compare_point+=split_point;
+					count_list++;
+				}
+				for(int i=count_list-1;i>0;i--){
+					if(a[list_of_compare_point[i]]==x){
+						return i;
+					}if(x>a[list_of_compare_point[i]] && x<end){
+						start=a[list_of_compare_point[i]];
+					}if(x<a[list_of_compare_point[i]]){
+						end=a[list_of_compare_point[i]];
+					}else if(x==start) {return start;}
+					 else if(x==end) {return end;}
+				}
+			split_point/=type;
+		}
 	}
 	return -1;
 }
