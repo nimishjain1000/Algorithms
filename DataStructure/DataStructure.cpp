@@ -53,34 +53,30 @@ int TernarySearch(int a[], int n, int x){
  * Binary Search Extend - N
  * @params
  */
-int NSearch(int a[],int n, int x,int type,int start,int end){
+int NSearch(int a[],int n, int x,int type){
+	int start=0;
+	int end=n-1;
 	int split_point = n/type;
 	int compare_point; // 1st compare point
-	if(split_point<1){
-		compare_point=0;
-	}else{
-		compare_point=split_point;
-	}
-	int *list_of_compare_point=new int[n];
-	int count_list=0;
-	while(compare_point<=end){
-		list_of_compare_point[compare_point]=compare_point;
-		compare_point+=split_point;
-		count_list++;
-	}
-	for(int i=0;i<count_list;i++){
-		if(a[i]==x){
-			return i;
-		}if(start==end){
-			return -1;
-		}
-		else{
-			if(x>a[i]){
-				start=a[i];
-			}else if(x<a[i]){
-				end=i;
+	while(split_point>=1){
+		int *list_of_compare_point=new int[n];
+			int count_list=0;
+			while(compare_point<=end-split_point){
+				list_of_compare_point[count_list]=compare_point;
+				compare_point+=split_point;
+				count_list++;
 			}
-		}
+			for(int i=count_list-1;i>0;i--){
+				if(a[list_of_compare_point[i]]==x){
+					return i;
+				}if(x>a[list_of_compare_point[i]] && x<end){
+					start=a[list_of_compare_point[i]];
+				}if(x<a[list_of_compare_point[i]]){
+					end=a[list_of_compare_point[i]];
+				}else if(x==start) {return start;}
+				 else if(x==end) {return end;}
+			}
+		split_point/=type;
 	}
 	return -1;
 }
@@ -103,7 +99,9 @@ int main() {
 		int a[] = {1,2,8,9,10,11,15,19,20,23,29,30,32,35,47,90};
 		int arraySize = sizeof(a)/sizeof(*a);
 		int x;cout << "Enter number for search:\n"; cin >> x;
+		int type=4;
 		int i = TernarySearch(a,arraySize,x);
+//		int i=NSearch(a,arraySize,x,type);
 		if(i>=0){
 			cout << "Found at position :"<< i<<endl;
 		}else{
