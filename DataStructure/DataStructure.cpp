@@ -10,24 +10,6 @@
 #include <iostream>
 using namespace std;
 
-/*
- * Ternary Search Recursive
- * @params
- */
-int TernarySearch_Recursive(int a[],int x,int pos1,int pos2,int n){
-
-//    if(pos1<0 || pos2>n-1 || pos1>pos2) {return -1;}
-//    if(x==pos1) {return pos1;}
-//    if(x==pos2) {return pos2;}
-//
-//    if(x<pos1) {return ternary_search(a,x,pos1-1,pos2,n);}
-//
-//    if(x>pos1 && x<pos2) {return ternary_search(a,x,pos1+1,pos2-1,n);}
-//
-//    if(x>pos2) {return ternary_search(a,x,pos1,pos2+1,n);}
-
-	return 0;
-}
 /**
  * Ternary Search Increase.
  * @params a[],n,x
@@ -41,8 +23,8 @@ int TernarySearch(int a[], int n, int x){
 	int end=n-1;
 	int point = n / 3;     // Find the split point.
 		if(point <1){
-			left = 0;
-			right = n-1;
+			left = start;
+			right = end;
 		}else{
 			left = point;
 			right = point*2;
@@ -71,10 +53,35 @@ int TernarySearch(int a[], int n, int x){
  * Binary Search Extend - N
  * @params
  */
-int NSearch(int a[],int n, int x,int type){
-	int start=0;
-	int end=n-1;
-	int split_point=n/type;
+int NSearch(int a[],int n, int x,int type,int start,int end){
+	int split_point = n/type;
+	int compare_point; // 1st compare point
+	if(split_point<1){
+		compare_point=0;
+	}else{
+		compare_point=split_point;
+	}
+	int *list_of_compare_point=new int[n];
+	int count_list=0;
+	while(compare_point<=end){
+		list_of_compare_point[compare_point]=compare_point;
+		compare_point+=split_point;
+		count_list++;
+	}
+	for(int i=0;i<count_list;i++){
+		if(a[i]==x){
+			return i;
+		}if(start==end){
+			return -1;
+		}
+		else{
+			if(x>a[i]){
+				start=a[i];
+			}else if(x<a[i]){
+				end=i;
+			}
+		}
+	}
 	return -1;
 }
 /**
@@ -98,7 +105,7 @@ int main() {
 		int x;cout << "Enter number for search:\n"; cin >> x;
 		int i = TernarySearch(a,arraySize,x);
 		if(i>=0){
-			cout << "Found at :"<< i<<endl;
+			cout << "Found at position :"<< i<<endl;
 		}else{
 			cout << "Not found !";
 		}
