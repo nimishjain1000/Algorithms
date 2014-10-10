@@ -69,10 +69,10 @@ FIND_LOOP:
     mov word ptr [di+DATA_ARRAY+1],ax
     mov word ptr [di+DATA_ARRAY+3],4956H
     
-    mov cx,5                      ; set 5 bytes ghi vo host
-    lea dx,[di+DATA_ARRAY]        ; tai vi tri data_array
-    mov ah,40H
-    int 21H                       ; ghi
+;    mov cx,5                      ; set 5 bytes ghi vo host
+;    lea dx,[di+DATA_ARRAY]        ; tai vi tri data_array
+;    mov ah,40H
+;    int 21H                       ; ghi
     
 CLOSE_FILE:    
     mov ah,3EH      
@@ -82,15 +82,15 @@ CLOSE_FILE:
     jmp FIND_LOOP  
          
 DONE:
-    mov ah,1AH                      ; restore DTA
-    mov dx,80H
-    int 21H
-    mov si,offset START             ; restore 
-    push si
-    lea si,[bp+TERMINATE]
-    movsw
-    movsw
-    movsb     
+;    mov ah,1AH                      ; restore DTA
+;    mov dx,80H
+;    int 21H
+;    mov si,offset START             ; restore 
+;    push si
+;    lea si,[bp+TERMINATE]
+;    movsw
+;    movsw
+;    movsb     
     ret                             ; tra lai access cho host
         
     
