@@ -18,12 +18,14 @@ option casemap:none
 FolderPath                      BYTE                        "C:\Users\F.U.C.K\Desktop\*.exe", 0
 FindFirstFileError              BYTE                        "FindFirstFile failed ", 0
 FindFirstFileSuccess            BYTE                        "First file found with success ", 0
+FindNextFileError               BYTE                        "FindNextFile failed ", 0
+FindNextFileSuccess            BYTE                         "FirstNextFile found with success ", 0
 PrintStructAddr                 BYTE                        "addr=Ox%08X", 0
 PrintFileName                   BYTE                        "%s", 0
 .data?
 
 hFile                           HANDLE 			      ?
-findFileData                    WIN32_FIND_DATA   		<>
+findFileData                    WIN32_FIND_DATA   		<>   ; file handle data
 retFindNextFile                 BOOL                        ?
 ErrorCode                       DWORD                       ?
 
@@ -31,15 +33,28 @@ ErrorCode                       DWORD                       ?
 ; ---------------------------------------------------------------------------
 	
 virusStart:
-	
+findFirst:	
 	invoke FindFirstFile, addr FolderPath, addr findFileData
-		.if eax==INVALID_HANDLE_VALUE
-			invoke GetLastError
-			mov ErrorCode,eax
-			invoke MessageBox,NULL,addr FindFirstFileError,addr ErrorCode,MB_ICONERROR
-		.endif
-	mov ebx, OFFSET findFileData
-	invoke MessageBox,NULL,addr findFileData.cFileName,addr findFileData.cFileName,MB_ICONERROR
-	invoke ExitProcess,0
-	
+	.if eax==INVALID_HANDLE_VALUE
+		invoke GetLastError
+		mov ErrorCode,eax
+		invoke MessageBox,NULL,addr FindFirstFileError,addr ErrorCode,MB_ICONERROR
+	.else
+		mov hFile, eax
+		mov ebx, OFFSET findFileData   ; Move file handle to bx
+		invoke MessageBox,NULL,addr [ebx].WIN32_FIND_DATA.cFileName,addr FindFirstFileSuccess,MB_OK
+	.endif
+findNext:	
+	invoke FindNextFile, addr hFile , addr findFileData
+	.if eax==INVALID_HANDLE_VALUE
+		invoke GetLastError
+		mov ErrorCode,eax
+		invoke MessageBox,NULL,addr FindNextFileError,addr ErrorCode,MB_ICONERROR
+	.else
+		mov hFile, eax
+		mov ebx, OFFSET findFileData   ; Move file handle to bx
+		invoke MessageBox,NULL,addr [ebx].WIN32_FIND_DATA.cFileName,addr FindNextFileSuccess,MB_OK
+	.endif
+exit: 
+		invoke ExitProcess,0
 end virusStart
