@@ -1,0 +1,49 @@
+[Project]
+Assembler=masm
+Type=Win32 App
+Description=Virus
+Backup=$P\Bak\
+Group=1
+GroupExpand=1
+[Files]
+1=Virus.Asm
+2=Virus.Inc
+3=Virus.Rc
+4=Virus.Txt
+[MakeFiles]
+0=Virus.rap
+1=Virus.rc
+2=Virus.asm
+3=Virus.obj
+4=Virus.res
+5=Virus.exe
+6=Virus.def
+7=Virus.dll
+8=Virus.txt
+9=Virus.lib
+10=Virus.mak
+11=Virus.hla
+12=Virus.com
+13=Virus.ocx
+14=Virus.idl
+15=Virus.tlb
+16=Virus.sys
+[MakeDef]
+Menu=1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0
+1=4,O,$B\RC.EXE /v,1
+2=3,O,$B\ML.EXE /c /coff /Cp /nologo /I"$I",2
+3=5,O,$B\LINK.EXE /SUBSYSTEM:WINDOWS /RELEASE /VERSION:4.0 /LIBPATH:"$L" /OUT:"$5",3,4
+4=0,0,,5
+5=rsrc.obj,O,$B\CVTRES.EXE,rsrc.res
+6=*.obj,O,$B\ML.EXE /c /coff /Cp /nologo /I"$I",*.asm
+7=0,0,"$E\OllyDbg",5
+[Group]
+Group=Assembly,Resources,Misc
+1=2
+2=2
+3=3
+4=4
+[AutoLoad]
+AutoLoad=
+[RADebugBP]
+1=
