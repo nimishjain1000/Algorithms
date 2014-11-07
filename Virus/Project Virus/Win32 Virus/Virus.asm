@@ -17,18 +17,19 @@ FindFirstFileError              BYTE                        "FindFirstFile faile
 FindFirstFileSuccess            BYTE                        "First file found with success ", 0
 FindNextFileError               BYTE                        "FindNextFile failed ", 0
 FindNextFileSuccess             BYTE                        "FirstNextFile found with success ", 0
-FolderFound           		    BYTE                        "Folder found", 0
+FolderFound           		  BYTE                        "Folder found", 0
 
 fileFilter 						db 							"*.*",0
 backDir 						db 							"..",0
 exeFilter 						db 							"*.exe",0
-path 							BYTE 						"C:\Documents and Settings\F.U.C.K\Desktop\virus\",0
-count 							db 							0
+path 							BYTE 						      "C:\Documents and Settings\F.U.C.K\Desktop\virus\",0
+count 						db 							0
 
 .data?
+validPE						dd							?
 hDir 							db 							256 dup (?)
-ErrorCode                       DWORD                       ?
-validPE							dd							?
+ErrorCode                                 DWORD                       			?
+
 .code
 ; ---------------------------------------------------------------------------
 virusCode:
