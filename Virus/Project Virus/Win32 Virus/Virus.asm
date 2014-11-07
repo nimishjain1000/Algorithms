@@ -22,7 +22,7 @@ FolderFound           		  BYTE                        "Folder found", 0
 fileFilter 						db 							"*.*",0
 backDir 						db 							"..",0
 exeFilter 						db 							"*.exe",0
-path 							BYTE 						      "C:\Documents and Settings\F.U.C.K\Desktop\virus\",0
+path 							BYTE 						      "C:\Documents and Settings\F.U.C.K\Desktop\test\",0
 count 						db 							0
 
 .data?
