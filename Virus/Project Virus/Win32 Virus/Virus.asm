@@ -269,7 +269,6 @@ end_objecttable:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 image_base    				dd    0h 
-
 kernel_string   		      	db    "kernel32.dll", 0 
 search_mask    				db    "*.exe", 0 
 handle       				dd    0h
