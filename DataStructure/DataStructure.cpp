@@ -1,113 +1,170 @@
-////============================================================================
-//// Name        : DataStructure.cpp
-//// Author      : Do Minh Quan -- 11520616
-//// Email       : dominhquan.uit@gmail.com
-//// Mail GV     : phongtn@uit.edu.vn
-//// Type        : Data Structure & Algorithms
-//// Description : C++, ANSI-style
-////============================================================================
-//
-//#include <iostream>
-//using namespace std;
-//
-///**
-// * Ternary Search Increase.
-// * @params a[],n,x
-// * @return :
-// * 				+ Not found(-1).
-// * 				+ Found (location in array).
-// */
-//int TernarySearch(int a[], int n, int x){
-//	int left, right;
-//	int start=0;
-//	int end=n-1;
-//	int point = n / 3;     // Find the split point.
-//		if(point <1){
-//			left = start;
-//			right = end;
-//		}else{
-//			left = point;
-//			right = point*2;
-//		}
-//		while(left <= right)	{
-//			point /= 3;
-//			if(x > a[right]){
-//				start = right ;
-//				left = start + point;
-//				right = left + point;
-//			}else if( x < a[left] ){
-//				end = left;
-//				left = start + point;
-//				right = left + point;
-//			}else if(x > a[left] && x < a[right]){
-//				start = left;
-//				end = right;
-//				left = start + point;
-//				right = left + point;
-//			} else if( x== a[left]) {return left;}
-//			  else if(x == a[right]) {return right;}
-//		}
-//	return -1; // Not found !!
-//}
-///*
-// * Binary Search Extend - N
-// * @params
-// */
-//int NSearch(int a[],int n, int x,int type){
-//	int start=0;
-//	int end=n-1;
-//	int split_point = n/type;
-//	int compare_point; // 1st compare point
-//	while(start<=end){
-//		while(split_point>=1){
-//			int *list_of_compare_point=new int[n];
-//				int count_list=0;
-//				while(compare_point<=end-split_point){
-//					list_of_compare_point[count_list]=compare_point;
-//					compare_point+=split_point;
-//					count_list++;
-//				}
-//				for(int i=count_list-1;i>0;i--){
-//					if(a[list_of_compare_point[i]]==x){
-//						return i;
-//					}if(x>a[list_of_compare_point[i]] && x<end){
-//						start=a[list_of_compare_point[i]];
-//					}if(x<a[list_of_compare_point[i]]){
-//						end=a[list_of_compare_point[i]];
-//					}else if(x==start) {return start;}
-//					 else if(x==end) {return end;}
-//				}
-//			split_point/=type;
-//		}
-//	}
-//	return -1;
-//}
-///**
-// * Main method
-// */
-//int main() {
-//
-//	/*
-//	 * Some test case.
-//	 */
-//
-////		int a[]= {};
-////		int a[]= {1};
-////		int a[]= {1,2};
-////		int a[]= {1,2,3};
-////		int a[]= {1,2,3,4};
-////		int a[] = {1,2,3,4,5,6,7,8,9,10};
-////		int a[] = {1,2,4,5,7,11,22,33,38,40,46,47};
-//		int a[] = {1,2,8,9,10,11,15,19,20,23,29,30,32,35,47,90};
-//		int arraySize = sizeof(a)/sizeof(*a);
-//		int x;cout << "Enter number for search:\n"; cin >> x;
-//		int type=4;
-//		int i = TernarySearch(a,arraySize,x);
-////		int i=NSearch(a,arraySize,x,type);
-//		if(i>=0){
-//			cout << "Found at position :"<< i<<endl;
-//		}else{
-//			cout << "Not found !";
-//		}
-//		return 0;
-//}
+/*============================================================================
+* Name        : DataStructure.cpp
+* Author      : Do Minh Quan -- 11520616
+* Email       : dominhquan.uit@gmail.com
+* Mail GV     : phongtn@uit.edu.vn
+* Type        : Data Structure & Algorithms
+* Description : C++, ANSI-style
+============================================================================*/
+
+#include <iostream>
+#include <cstdlib>
+#include <ctime>
+#include <string.h>
+#include <string>
+#include <sstream>
+using namespace std;
+
+class Player{
+	public :
+		std::string name;
+		int price_1;
+		int price_2;
+		int price_3;
+};
+class Node {
+	public:
+		Player player;
+		Node *nextNode;
+};
+class ListQueue{
+	private:
+		Node *front;
+		Node *rear;
+		int size;
+	public:
+		ListQueue(){
+			front=NULL;
+			rear=NULL;
+			size=0;
+		}
+		void enQueue(Player player){
+			Node *tmpNode=new Node();
+			tmpNode->player=player;   		// set data to new Node
+			tmpNode->nextNode=NULL;   		// new Node ->nextNode =NULL (cuz rear)
+			if(isEmpty()){			  		// check if ListQueue is empty
+				front=rear=tmpNode;	  		// Yes, queue list now has only 1 Node
+			}else{					  		// No
+				rear->nextNode=tmpNode;  	// set previous rear->nextNode to new rear (tmpNode)
+				rear=tmpNode;				// Now new Node become the rear.
+			}
+			size++; 						// increase quese size
+		}
+		Player deQueue(){
+			Player player;
+			if(!isEmpty()){
+				player=front->player;
+			    Node *tmpNode=front;
+			    front=front->nextNode;
+				size--;
+				delete tmpNode;
+			}
+			return player;
+		}
+		Player getFront(){
+			Player player;
+			if(isEmpty()==true){
+				player=front->player;
+			}
+			return player;
+		}
+		Player getRear(){
+			Player player;
+			if(isEmpty()==true){
+				player=front->player;
+			}
+			return player;
+		}
+		int getSize(){
+			return size;
+		}
+		bool isEmpty(){
+			return size == 0?true:false;
+		}
+		void showList(){
+			Node *node=new Node();
+			node=front;
+			if(isEmpty()){
+				cout<<"\nEmpty Queue\n";
+			}else{
+				while(node!=NULL){
+					Player player=node->player;
+					cout<<player.name<<":"<<player.price_1<<"-"<<player.price_2<<"-"<<player.price_3<<endl;
+					node=node->nextNode;
+				}
+			}
+
+		}
+		int findListValueUniqueInArray(int array[],int array_store[]){
+			int count=0;
+			for(int i=1;i<10;i++){
+				if(checkUnique(i,array)==true){
+					array_store[count]=array[i];
+					count++;
+				}
+			}
+			return count;
+		}
+		int findUniqueMinInArray(int array[],int size){
+			int min=array[0];
+			for(int i=0;i<size;i++){
+				if(array[i]<min){
+					min=array[i];
+				}
+			}
+			return min;
+		}
+		bool checkUnique(int pos,int array[]){
+			for(int i=1;i<10;i++){
+				if(array[i]==array[pos] && i!=pos){
+					return false;
+				}
+			}
+			return true;
+		}
+};
+int main(){
+	srand (time(NULL));
+	ListQueue listQueue;
+	int array[10];
+	int count=1;
+	for (int i = 1;i <4;i++) {
+		Player player;
+		std::stringstream out;
+		out<<i;
+		player.name="Player-" +out.str();
+		player.price_1=rand() % 20 + 1;
+		player.price_2=rand() % 20 + 1;
+		player.price_3=rand() % 20 + 1;
+		array[count]=player.price_1;
+		count++;
+		array[count]=player.price_2;
+		count++;
+		array[count]=player.price_3;
+		count++;
+		listQueue.enQueue(player);
+	}
+	cout<<"-----------------List-----------------"<<endl;
+	listQueue.showList();
+	int* array_store = new int[10];
+	int size=listQueue.findListValueUniqueInArray(array,array_store);
+	if(size>0){
+		int min=listQueue.findUniqueMinInArray(array_store,size);
+		int pos_min=1;
+		for (int i=1;i<10;i++){
+			if(array[i]==min){
+				pos_min=i;
+			}
+		}
+		string player_win="1";
+		if(pos_min >3 && pos_min<7){
+			player_win="2";
+		}
+		if(pos_min<10 && pos_min>=7){
+			player_win="3";
+		}
+		cout<<"Player win : "<<player_win<<" with price :"<<array[pos_min]<<endl;
+	}else{
+		cout<<"No one win this match "<<endl;
+	}
+}
