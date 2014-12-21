@@ -13,11 +13,6 @@ typedef struct TS{
 	int diem;
 }TS;
 
-typedef struct NodeTS{
-	TS ts;
-	NodeTS *pNext;
-}NodeTS;
-
 typedef struct SV{
 	std::string name;
 	std::string makhoa;
@@ -30,6 +25,11 @@ typedef struct Node{
 	Node *pNext;
 }Node;
 
+typedef struct NodeTS{
+	TS ts;
+	NodeTS *pNext;
+}NodeTS;
+
 typedef struct List{
 	NodeTS *pHead;
 	NodeTS *pTail;
@@ -38,13 +38,14 @@ typedef struct List{
 typedef struct Tree{
 
 }Tree;
+
 class Stack{
 	private:
 		int size;
 		Node *top;
 	public:
 		Stack(){
-			top = NULL;
+			top = nullptr;
 			size = 0;
 		}
 
@@ -180,8 +181,8 @@ class LinkedList{
 	public:
 		LinkedList(){
 			list = new List;
-			list->pHead = NULL;
-			list->pTail = NULL;
+			list->pHead = nullptr;
+			list->pTail = nullptr;
 			size = 0;
 		}
 		
@@ -189,7 +190,7 @@ class LinkedList{
 			NodeTS *node = new NodeTS;
 			node->ts = ts;
 			if (isEmpty()){
-				node->pNext = NULL;
+				node->pNext = nullptr;
 				list->pHead = node;
 				list->pTail = node;
 			}
@@ -237,8 +238,8 @@ class LinkedList{
 				minNode = currentHead;
 				nextNode = currentHead->pNext;
 				while (nextNode){
-					if (nextNode->ts.diem < currentHead->ts.diem){
-						minNode = nextNode;
+					if (nextNode->ts.diem < minNode->ts.diem){ 
+						minNode = nextNode; 
 					}
 					nextNode = nextNode->pNext;
 				}
@@ -249,27 +250,12 @@ class LinkedList{
 			}
 		}
 
-		void quickSortList(List &list){
+		void quickSortList(){
 			NodeTS *p, *x;
 			List l1, l2;
-			if (list.pHead = list.pTail) return;
+			if (list->pHead = list->pTail) return;
 
 		}
-		void printList(){
-			if (isEmpty()){
-				cout << "List is empty" << endl;
-			}
-			else{
-				NodeTS *currentFront = list->pHead;
-				cout << "--- TS Info ---" << endl;
-				while (currentFront){
-					cout << "Name :" << currentFront->ts.hoten << "  ---- Diem : "<<currentFront->ts.diem<<endl;
-					currentFront = currentFront->pNext;
-				}
-				cout << "--- End TS Info ---" << endl;
-			}
-		}
-
 
 		NodeTS* getNode(List &list,std::string hoten){
 			if (!isEmpty()){
@@ -287,39 +273,65 @@ class LinkedList{
 		}
 
 		int deleteNode(List &list, TS ts){
-			if (!isEmpty()){
-				NodeTS *p=list.pHead;
-				NodeTS *q = nullptr;
-				while (p && (p->ts.hoten!=ts.hoten)){
-					q = p;
-					p = p->pNext;
-				}
-				if (p == NULL){ return 0; }
-				if (q != NULL){}
-				else{ removeHead(list, ts); }
-				size--;
-				return 1;
-			}
+//			if (!isEmpty()){
+//				NodeTS *p=list.pHead;
+//				NodeTS *q = nullptr;
+//				while (p && (p->ts.hoten!=ts.hoten)){
+//					q = p;
+//					p = p->pNext;
+//				}
+//				if (p == NULL){ return 0; }
+//				if (q != NULL){}
+//				else{ removeHead(list, ts); }
+//				size--;
+//				return 1;
+//			}
 			return -1;
 		}
 		
-		int removeHead(List &list, TS ts){
+		int removeHead(){
 			if (isEmpty()){ return 0; }
-			NodeTS *node=list.pHead;
-			node->ts = ts;
-			list.pHead = list.pHead->pNext;
+			NodeTS *node=list->pHead;
+			list->pHead = list->pHead->pNext;
 			delete node;
 			if (isEmpty()){
-				list.pHead = nullptr;
-				list.pTail = nullptr;
+				list->pHead = nullptr;
+				list->pTail = nullptr;
 			}
 			return 1;
 		}
 
+		int removeTail(){
+			if (isEmpty()){ return 0; }
+			NodeTS *headNode = list->pHead;
+			while (headNode->pNext!=list->pTail){
+				headNode = headNode->pNext;
+			}
+			NodeTS *tailNode = list->pTail;
+			headNode->pNext = nullptr;
+			delete tailNode; 
+			if (isEmpty()){
+				list->pHead = nullptr;
+				list->pTail = nullptr;
+			}
+		}
+		
 		bool isEmpty(){
 			return size == 0 ? true : false;
 		}
 
+		void printList(){
+			if (isEmpty()){
+				cout << "List is empty" << endl;
+			}
+			else{
+				NodeTS *currentFront = list->pHead;
+				while (currentFront){
+					cout << "Name :" << currentFront->ts.hoten << "  ---- Diem : " << currentFront->ts.diem << endl;
+					currentFront = currentFront->pNext;
+				}
+			}
+		}
 };
 
 class BinaryTree{
@@ -327,13 +339,49 @@ class BinaryTree{
 };
 
 class SearchAndSort{
-	
+	public:
+		int LinearSearch(int array[],int x,int n){
+			int i = 0;
+			while (array[i] != x && i<n) { i++; }
+			if (i == n) { return 0; }
+			return i;
+		}
+
+		int BinarySearch(int array[], int x,int n){
+			int left=0,mid= 0;
+			int right = n - 1;
+			while (left <= right){
+				mid = (left + right) / 2;
+				if (array[mid] == x) return mid;
+				if (array[mid] < x) left = mid + 1;
+				else right = mid - 1;
+			}
+			return 0;
+		}
+
+		void interchangeSort(int array[],int n){
+			
+		}
+		void printArray(int array[], int size){
+			int i = 0;
+			cout << "Array : ";
+			for (i = 0; i < size; i++){
+				cout << array[i] << "-";
+			}
+			cout << endl;
+		}
+		void swap(int &a, int &b){
+			a = a + b;
+			b = a - b;
+			a = a - b; 
+		}
+
 };
 
 int main(){
 	SV *sv = new SV;
 	TS *ts = new TS;
-	srand(time(NULL));
+	srand(time(nullptr));
 	LinkedList *list = new LinkedList;
 	Stack *stack = new Stack;
 	Queue *queue = new Queue;
@@ -348,11 +396,7 @@ int main(){
 		stack->push(*sv);
 		queue->enQueue(*sv);
 	}
-
-	/* -----------------------------------  /
-	/  ------------Linked list------------  /
-	/  ----------------------------------- */
-	for (int i = 1; i < 21; i++){
+	for (int i = 1; i < 10; i++){
 		std::stringstream out;
 		out << i;
 		ts->hoten = "TS.0" + out.str();
@@ -362,47 +406,51 @@ int main(){
 		ts->ngaysinh = "1/1/1993";
 		list->addHead(*ts);
 	}
+
+	/* -----------------------------------  /
+	/  ------------Linked list------------  /
+	/  ----------------------------------- */
 	cout << "-----------------Before Sort----------------" << endl;
 	list->printList();
 	list->selectionSort();
 	cout << "-----------------After Sort----------------" << endl;
 	list->printList();
-//
-//	/* -----------------------------------  / 
-//	/  ---------------Stack---------------  / 
-//	/  ----------------------------------- */
-//	cout << "-----------------Before POP----------------" << endl;
-//	stack->printStack();
-//	*sv = stack->pop(); 
-//	cout << "Pop :" << sv->name << endl; 
-//	cout << "-----------------After POP----------------" << endl;
-//	stack->printStack();
-//	*sv = stack->pop(); 
-//	cout << "Pop :" << sv->name << endl;
-//	cout << "-----------------After POP----------------" << endl;
-//	stack->printStack();
-//	*sv = stack->pop();
-//	cout << "Pop :" << sv->name << endl;
-//	cout << "-----------------After POP----------------" << endl;
-//	stack->printStack();
-//
-//	/* -----------------------------------  /
-//	/  ---------------Queue---------------  /
-//	/  ----------------------------------- */
-//	cout << "-----------------Before Dequeue----------------" << endl;
-//	queue->printQueue(); 
-//    *sv=queue->deQueue();
-//	cout << "Dequeue :" << sv->name << endl;
-//	cout << "-----------------After Dequeue----------------" << endl;
-//	queue->printQueue();
-//	*sv = queue->deQueue();
-//	cout << "Dequeue :" << sv->name << endl;
-//	cout << "-----------------After Dequeue----------------" << endl;
-//	queue->printQueue();
-//	*sv = queue->deQueue();
-//	cout << "Dequeue :" << sv->name << endl;
-//	cout << "-----------------After Dequeue----------------" << endl;
-//	queue->printQueue();
+
+	/* -----------------------------------  / 
+	/  ---------------Stack---------------  / 
+	/  ----------------------------------- */
+	cout << "-----------------Before POP----------------" << endl;
+	stack->printStack();
+	*sv = stack->pop(); 
+	cout << "Pop :" << sv->name << endl; 
+	cout << "-----------------After POP----------------" << endl;
+	stack->printStack();
+	*sv = stack->pop(); 
+	cout << "Pop :" << sv->name << endl;
+	cout << "-----------------After POP----------------" << endl;
+	stack->printStack();
+	*sv = stack->pop();
+	cout << "Pop :" << sv->name << endl;
+	cout << "-----------------After POP----------------" << endl;
+	stack->printStack();
+
+	/* -----------------------------------  /
+	/  ---------------Queue---------------  /
+	/  ----------------------------------- */
+	cout << "-----------------Before Dequeue----------------" << endl;
+	queue->printQueue(); 
+    *sv=queue->deQueue();
+	cout << "Dequeue :" << sv->name << endl;
+	cout << "-----------------After Dequeue----------------" << endl;
+	queue->printQueue();
+	*sv = queue->deQueue();
+	cout << "Dequeue :" << sv->name << endl;
+	cout << "-----------------After Dequeue----------------" << endl;
+	queue->printQueue();
+	*sv = queue->deQueue();
+	cout << "Dequeue :" << sv->name << endl;
+	cout << "-----------------After Dequeue----------------" << endl;
+	queue->printQueue();
 
 
 
