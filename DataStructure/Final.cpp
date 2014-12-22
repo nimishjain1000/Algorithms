@@ -342,7 +342,6 @@ class BinaryTree{
 	public:
 		BinaryTree(Tree &tree){
 			size=0;
-			tree = NULL;
 			tree.leftNode= nullptr;
 			tree.rightNode= nullptr;
 			tree.x=NULL;
@@ -364,6 +363,7 @@ class BinaryTree{
 
 class SearchAndSort{
 public:
+
 	int LinearSearch(int array[],int x,int n){
 		int i = 0;
 		while (array[i] != x && i<n) { i++; }
@@ -384,20 +384,57 @@ public:
 	}
 
 	void interchangeSort(int array[],int n){
-
+		int i,j;
+		for (i = 0; i < n - 1; i++){
+			for (j = i + 1; j < n ; j++){
+				if (array[j]>array[i]){
+					swap(array[i], array[j]);
+				}
+			}
+		}
 	}
+
+	void selectionSort(int array[], int n){
+		int i, j, min;
+		for (i = 0; i < n - 1; i++){
+			min = i;
+			for (j = i + 1; j < n ; j++){
+				if (array[j] > array[min]) 
+				min = j;
+			}
+			swap(array[min], array[i]);
+		}
+	}
+
+	void bubbleSort(int array[], int n){
+		int i, j;
+		for (i = 0; i < n - 1; i++){
+			for (j = n - 1; j>i; j--){
+				if (array[j] > array[j - 1])
+					swap(array[j], array[j - 1]);
+			}
+		}
+	}
+
 	void printArray(int array[], int size){
 		int i = 0;
 		cout << "Array : ";
 		for (i = 0; i < size; i++){
-			cout << array[i] << "-";
+			cout << array[i] << " ";
 		}
 		cout << endl;
 	}
+
 	void swap(int &a, int &b){
 		a = a + b;
 		b = a - b;
 		a = a - b;
+	}
+
+	void createRandomArray(int array[],int size){
+		for(int i=0; i<size; i++){
+			array[i] = (rand()%100)+1;
+		}
 	}
 
 };
@@ -409,72 +446,84 @@ int main(){
 	LinkedList *list = new LinkedList;
 	Stack *stack = new Stack;
 	Queue *queue = new Queue;
+	SearchAndSort *search_and_sort = new SearchAndSort;
+	int array[30];
+	search_and_sort->createRandomArray(array,30);
+	search_and_sort->printArray(array, 30);
+//	search_and_sort->interchangeSort(array,30);
+	search_and_sort->selectionSort(array, 30);
+//	search_and_sort->bubbleSort(array, 30);
+	search_and_sort->printArray(array, 30);
+	/* -----------------------------------  /
+	/  ---------Search and sort-----------  /
+	/  ----------------------------------- */
 
-	for (int i = 1; i < 4; i++){
-		std::stringstream out;
-		out << i;
-		sv->name = "SV." + out.str();
-		sv->khoa = i;
-		sv->makhoa = "MMT.0" + out.str();
-		sv->mssv = 1152000 + i;
-		stack->push(*sv);
-		queue->enQueue(*sv);
-	}
-	for (int i = 1; i < 10; i++){
-		std::stringstream out;
-		out << i;
-		ts->hoten = "TS.0" + out.str();
-		ts->coquan = "UIT";
-		ts->noisinh = "HCM City";
-		ts->diem = rand() % 10 + 1;
-		ts->ngaysinh = "1/1/1993";
-		list->addHead(*ts);
-	}
+
+//	for (int i = 1; i < 4; i++){
+//		std::stringstream out;
+//		out << i;
+//		sv->name = "SV." + out.str();
+//		sv->khoa = i;
+//		sv->makhoa = "MMT.0" + out.str();
+//		sv->mssv = 1152000 + i;
+//		stack->push(*sv);
+//		queue->enQueue(*sv);
+//	}
+//	for (int i = 1; i < 10; i++){
+//		std::stringstream out;
+//		out << i;
+//		ts->hoten = "TS.0" + out.str();
+//		ts->coquan = "UIT";
+//		ts->noisinh = "HCM City";
+//		ts->diem = rand() % 10 + 1;
+//		ts->ngaysinh = "1/1/1993";
+//		list->addHead(*ts);
+//	}
 
 	/* -----------------------------------  /
 	/  ------------Linked list------------  /
 	/  ----------------------------------- */
-	cout << "-----------------Before Sort----------------" << endl;
-	list->printList();
-	list->selectionSort();
-	cout << "-----------------After Sort----------------" << endl;
-	list->printList();
-
+//	cout << "-----------------Before Sort----------------" << endl;
+//	list->printList();
+//	list->selectionSort();
+//	cout << "-----------------After Sort----------------" << endl;
+//	list->printList();
+//
 	/* -----------------------------------  / 
 	/  ---------------Stack---------------  / 
 	/  ----------------------------------- */
-	cout << "-----------------Before POP----------------" << endl;
-	stack->printStack();
-	*sv = stack->pop();
-	cout << "Pop :" << sv->name << endl;
-	cout << "-----------------After POP----------------" << endl;
-	stack->printStack();
-	*sv = stack->pop();
-	cout << "Pop :" << sv->name << endl;
-	cout << "-----------------After POP----------------" << endl;
-	stack->printStack();
-	*sv = stack->pop();
-	cout << "Pop :" << sv->name << endl;
-	cout << "-----------------After POP----------------" << endl;
-	stack->printStack();
-
+//	cout << "-----------------Before POP----------------" << endl;
+//	stack->printStack();
+//	*sv = stack->pop();
+//	cout << "Pop :" << sv->name << endl;
+//	cout << "-----------------After POP----------------" << endl;
+//	stack->printStack();
+//	*sv = stack->pop();
+//	cout << "Pop :" << sv->name << endl;
+//	cout << "-----------------After POP----------------" << endl;
+//	stack->printStack();
+//	*sv = stack->pop();
+//	cout << "Pop :" << sv->name << endl;
+//	cout << "-----------------After POP----------------" << endl;
+//	stack->printStack();
+//
 	/* -----------------------------------  /
 	/  ---------------Queue---------------  /
 	/  ----------------------------------- */
-	cout << "-----------------Before Dequeue----------------" << endl;
-	queue->printQueue();
-	*sv=queue->deQueue();
-	cout << "Dequeue :" << sv->name << endl;
-	cout << "-----------------After Dequeue----------------" << endl;
-	queue->printQueue();
-	*sv = queue->deQueue();
-	cout << "Dequeue :" << sv->name << endl;
-	cout << "-----------------After Dequeue----------------" << endl;
-	queue->printQueue();
-	*sv = queue->deQueue();
-	cout << "Dequeue :" << sv->name << endl;
-	cout << "-----------------After Dequeue----------------" << endl;
-	queue->printQueue();
+//	cout << "-----------------Before Dequeue----------------" << endl;
+//	queue->printQueue();
+//	*sv=queue->deQueue();
+//	cout << "Dequeue :" << sv->name << endl;
+//	cout << "-----------------After Dequeue----------------" << endl;
+//	queue->printQueue();
+//	*sv = queue->deQueue();
+//	cout << "Dequeue :" << sv->name << endl;
+//	cout << "-----------------After Dequeue----------------" << endl;
+//	queue->printQueue();
+//	*sv = queue->deQueue();
+//	cout << "Dequeue :" << sv->name << endl;
+//	cout << "-----------------After Dequeue----------------" << endl;
+//	queue->printQueue();
 
 
 
