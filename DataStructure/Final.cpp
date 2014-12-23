@@ -42,138 +42,138 @@ typedef struct Tree{
 }Tree;
 
 class Stack{
-private:
-	int size;
-	Node *top;
-public:
-	Stack(){
-		top = nullptr;
-		size = 0;
-	}
-
-	void push(SV &sv){
-		Node *tmp = new Node;
-		tmp->sv = sv;
-		tmp->pNext = top;
-		top = tmp;
-		size++;
-	}
-
-	SV pop(){
-		Node *tmp = top;
-		SV sv = top->sv;
-		top = top->pNext;
-		delete tmp;
-		size--;
-		return sv;
-	}
-
-	SV* getTop(){
-		return &top->sv;
-	}
-
-	bool isEmpty(){
-		return size == 0 ? true : false;
-	}
-
-	int getSize(){
-		return size;
-	}
-
-	void printStack(){
-		if (isEmpty()){
-			cout << "Stack is empty" << endl;
-		}else{
-			Node *currentTop = top;
-			while (currentTop){
-				cout << "--- SV Info ---" << endl;
-				cout << "Name :" << currentTop->sv.name << endl;
-				cout << "SV-Code : " << currentTop->sv.mssv << endl;
-				cout << "Grade : " << currentTop->sv.khoa << endl;
-				cout << "Group : " << currentTop->sv.makhoa << endl;
-				cout << "--- End SV Info ---" << endl;
-				currentTop = currentTop->pNext;
-			}
+	private:
+		int size;
+		Node *top;
+	public:
+		Stack(){
+			top = nullptr;
+			size = 0;
 		}
-	}
-};
 
-class Queue{
-private:
-	int size;
-	Node *front;
-	Node *rear;
-public:
-	Queue(){
-		front = NULL;
-		rear = NULL;
-		size = 0;
-	}
-
-	void enQueue(SV &sv){
-		Node *tmp = new Node;
-		tmp->sv = sv;
-		if (isEmpty()){
-			tmp->pNext = NULL;
-			front =  tmp;
-			rear = tmp;
+		void push(SV &sv){
+			Node *tmp = new Node;
+			tmp->sv = sv;
+			tmp->pNext = top;
+			top = tmp;
+			size++;
 		}
-		else{
-			if (size == 1){
-				front->pNext = tmp;
-			}else{
-				rear->pNext = tmp; // set current rear->nextNode =  temp Node
-			}
-			rear = tmp;
-			rear->pNext = NULL;
-		}
-		size++;
-	}
 
-	void printQueue(){
-		if (isEmpty()){
-			cout << "Queue is empty" << endl;
-		}else{
-			Node *currentFront = front;
-			while (currentFront){
-				cout << "--- SV Info ---" << endl;
-				cout << "Name :" << currentFront->sv.name << endl;
-				cout << "SV-Code : " << currentFront->sv.mssv << endl;
-				cout << "Grade : " << currentFront->sv.khoa << endl;
-				cout << "Group : " << currentFront->sv.makhoa << endl;
-				cout << "--- End SV Info ---" << endl;
-				currentFront = currentFront->pNext;
-			}
-		}
-	}
-
-	SV deQueue(){
-		if (!isEmpty()){
-			Node *tmp = front;
-			SV sv=front->sv;
-			front = front->pNext;
+		SV pop(){
+			Node *tmp = top;
+			SV sv = top->sv;
+			top = top->pNext;
 			delete tmp;
 			size--;
 			return sv;
 		}
-		exit(1);
-	}
 
-	SV* getFront(){
-		return &front->sv;
-	}
+		SV* getTop(){
+			return &top->sv;
+		}
 
-	SV* getRear(){
-		return &rear->sv;
-	}
+		bool isEmpty(){
+			return size == 0 ? true : false;
+		}
 
-	int getSize(){
-		return size;
-	}
+		int getSize(){
+			return size;
+		}
 
-	bool isEmpty(){
-		return size == 0 ? true : false;
-	}
+		void printStack(){
+			if (isEmpty()){
+				cout << "Stack is empty" << endl;
+			}else{
+				Node *currentTop = top;
+				while (currentTop){
+					cout << "--- SV Info ---" << endl;
+					cout << "Name :" << currentTop->sv.name << endl;
+					cout << "SV-Code : " << currentTop->sv.mssv << endl;
+					cout << "Grade : " << currentTop->sv.khoa << endl;
+					cout << "Group : " << currentTop->sv.makhoa << endl;
+					cout << "--- End SV Info ---" << endl;
+					currentTop = currentTop->pNext;
+				}
+			}
+		}
+};
+
+class Queue{
+	private:
+		int size;
+		Node *front;
+		Node *rear;
+	public:
+		Queue(){
+			front = nullptr;
+			rear = nullptr;
+			size = 0;
+		}
+
+		void enQueue(SV sv){
+			Node *tmp = new Node;
+			tmp->sv = sv;
+			if (isEmpty()){
+				tmp->pNext = nullptr;
+				front =  tmp;
+				rear = tmp;
+			}
+			else{
+				if (size == 1){
+					front->pNext = tmp;
+				}else{
+					rear->pNext = tmp; // set current rear->nextNode =  temp Node
+				}
+				rear = tmp;
+				rear->pNext = NULL;
+			}
+			size++;
+		}
+
+		void printQueue(){
+			if (isEmpty()){
+				cout << "Queue is empty" << endl;
+			}else{
+				Node *currentFront = front;
+				while (currentFront){
+					cout << "--- SV Info ---" << endl;
+					cout << "Name :" << currentFront->sv.name << endl;
+					cout << "SV-Code : " << currentFront->sv.mssv << endl;
+					cout << "Grade : " << currentFront->sv.khoa << endl;
+					cout << "Group : " << currentFront->sv.makhoa << endl;
+					cout << "--- End SV Info ---" << endl;
+					currentFront = currentFront->pNext;
+				}
+			}
+		}
+
+		SV deQueue(){
+			if (!isEmpty()){
+				Node *tmp = front;
+				SV sv=front->sv;
+				front = front->pNext;
+				delete tmp;
+				size--;
+				return sv;
+			}
+			exit(1);
+		}
+
+		SV* getFront(){
+			return &front->sv;
+		}
+
+		SV* getRear(){
+			return &rear->sv;
+		}
+
+		int getSize(){
+			return size;
+		}
+
+		bool isEmpty(){
+			return size == 0 ? true : false;
+		}
 };
 
 class LinkedList{
@@ -340,23 +340,66 @@ class BinaryTree{
 	private:
 		int size;
 	public:
-		BinaryTree(Tree &tree){
-			size=0;
+
+		void createTree(Tree &tree){
 			tree.leftNode= nullptr;
-			tree.rightNode= nullptr;
-			tree.x=NULL;
+			tree.rightNode = nullptr;
+			tree.x = NULL;
 		}
+
 		void addNode(Tree &tree,int x){
-			if(isEmpty()){
-				tree.x=x;
-			}else if(tree.x<x){
-				return addNode(*tree.leftNode,x);
-			}else if(tree.x>x) {
+			if(tree.x==NULL){
+				tree.x = x;
+				tree.leftNode = nullptr;
+				tree.rightNode = nullptr;
+			}else if (x<tree.x){
+				if (tree.leftNode == NULL){
+					tree.leftNode = new Tree;
+					createTree(*tree.leftNode);
+				}
+				return addNode(*tree.leftNode, x);
+			}
+			else if (x>tree.x) {
+				if (tree.rightNode == NULL){
+					tree.rightNode = new Tree;
+					createTree(*tree.rightNode);
+				}
 				return addNode(*tree.rightNode, x);
 			}
 		}
-		bool isEmpty() {
-			return size == 0 ? true : false;
+
+		void deleteTreeNode(Tree &tree, int x){
+
+		}
+
+		Tree* searchTreeNode(Tree *tree, int x){
+			Tree *root = tree;
+			while (root!=NULL)	{
+				if (root->x == x) {
+					return root;
+				}if (root->x>x){
+					root = root->leftNode;
+				}else if (root->x<x){
+					root = root->rightNode;
+				}
+			}
+			return NULL;
+		}
+
+		int countNode(Tree *tree){
+			int count = tree==NULL?0:1;
+			Tree *root = tree;
+			if (root->leftNode != NULL){
+				count += countNode(root->leftNode);
+			}
+			if (root->rightNode != NULL){
+				count += countNode(root->rightNode);
+			}
+			return count;
+		}
+
+		bool isEmpty(Tree *tree) {
+			return tree == NULL ? true : false;
 		}
 
 };
@@ -399,7 +442,7 @@ public:
 		for (i = 0; i < n - 1; i++){
 			min = i;
 			for (j = i + 1; j < n ; j++){
-				if (array[j] > array[min]) 
+				if (array[j] > array[min])
 				min = j;
 			}
 			swap(array[min], array[i]);
@@ -415,6 +458,7 @@ public:
 			}
 		}
 	}
+
 
 	void printArray(int array[], int size){
 		int i = 0;
@@ -440,99 +484,113 @@ public:
 };
 
 int main(){
+
+	int array[30];
+	srand(time(nullptr));
+
+	/* Data Structure*/
 	SV *sv = new SV;
 	TS *ts = new TS;
-	srand(time(nullptr));
+	Tree *tree = new Tree;
+
+	/* Class */
 	LinkedList *list = new LinkedList;
 	Stack *stack = new Stack;
 	Queue *queue = new Queue;
 	SearchAndSort *search_and_sort = new SearchAndSort;
-	int array[30];
-	search_and_sort->createRandomArray(array,30);
-	search_and_sort->printArray(array, 30);
-//	search_and_sort->interchangeSort(array,30);
-	search_and_sort->selectionSort(array, 30);
-//	search_and_sort->bubbleSort(array, 30);
-	search_and_sort->printArray(array, 30);
+	BinaryTree *binaryTree = new BinaryTree;
+
+
+	for (int i = 1; i < 4; i++){
+		std::stringstream out;
+		out << i;
+		sv->name = "SV." + out.str();
+		sv->khoa = i;
+		sv->makhoa = "MMT.0" + out.str();
+		sv->mssv = 1152000 + i;
+		stack->push(*sv);
+		queue->enQueue(*sv);
+	}
+	for (int i = 1; i < 10; i++){
+		std::stringstream out;
+		out << i;
+		ts->hoten = "TS.0" + out.str();
+		ts->coquan = "UIT";
+		ts->noisinh = "HCM City";
+		ts->diem = rand() % 10 + 1;
+		ts->ngaysinh = "1/1/1993";
+		list->addHead(*ts);
+	}
+
+
 	/* -----------------------------------  /
 	/  ---------Search and sort-----------  /
 	/  ----------------------------------- */
 
-
-//	for (int i = 1; i < 4; i++){
-//		std::stringstream out;
-//		out << i;
-//		sv->name = "SV." + out.str();
-//		sv->khoa = i;
-//		sv->makhoa = "MMT.0" + out.str();
-//		sv->mssv = 1152000 + i;
-//		stack->push(*sv);
-//		queue->enQueue(*sv);
-//	}
-//	for (int i = 1; i < 10; i++){
-//		std::stringstream out;
-//		out << i;
-//		ts->hoten = "TS.0" + out.str();
-//		ts->coquan = "UIT";
-//		ts->noisinh = "HCM City";
-//		ts->diem = rand() % 10 + 1;
-//		ts->ngaysinh = "1/1/1993";
-//		list->addHead(*ts);
-//	}
+	search_and_sort->createRandomArray(array, 30);
+	search_and_sort->printArray(array, 30);
+	search_and_sort->interchangeSort(array, 30);
+//	search_and_sort->selectionSort(array, 30);
+	search_and_sort->bubbleSort(array, 30);
+	search_and_sort->printArray(array, 30);
 
 	/* -----------------------------------  /
 	/  ------------Linked list------------  /
 	/  ----------------------------------- */
-//	cout << "-----------------Before Sort----------------" << endl;
-//	list->printList();
-//	list->selectionSort();
-//	cout << "-----------------After Sort----------------" << endl;
-//	list->printList();
-//
-	/* -----------------------------------  / 
-	/  ---------------Stack---------------  / 
+
+	cout << "-----------------Before Sort----------------" << endl;
+	list->printList();
+	list->selectionSort();
+	cout << "-----------------After Sort----------------" << endl;
+	list->printList();
+
+	/* -----------------------------------  /
+	/  ---------------Stack---------------  /
 	/  ----------------------------------- */
-//	cout << "-----------------Before POP----------------" << endl;
-//	stack->printStack();
-//	*sv = stack->pop();
-//	cout << "Pop :" << sv->name << endl;
-//	cout << "-----------------After POP----------------" << endl;
-//	stack->printStack();
-//	*sv = stack->pop();
-//	cout << "Pop :" << sv->name << endl;
-//	cout << "-----------------After POP----------------" << endl;
-//	stack->printStack();
-//	*sv = stack->pop();
-//	cout << "Pop :" << sv->name << endl;
-//	cout << "-----------------After POP----------------" << endl;
-//	stack->printStack();
-//
+	cout << "-----------------Before POP----------------" << endl;
+	stack->printStack();
+	*sv = stack->pop();
+	cout << "Pop :" << sv->name << endl;
+	cout << "-----------------After POP----------------" << endl;
+	stack->printStack();
+	*sv = stack->pop();
+	cout << "Pop :" << sv->name << endl;
+	cout << "-----------------After POP----------------" << endl;
+	stack->printStack();
+	*sv = stack->pop();
+	cout << "Pop :" << sv->name << endl;
+	cout << "-----------------After POP----------------" << endl;
+	stack->printStack();
+
 	/* -----------------------------------  /
 	/  ---------------Queue---------------  /
 	/  ----------------------------------- */
-//	cout << "-----------------Before Dequeue----------------" << endl;
-//	queue->printQueue();
-//	*sv=queue->deQueue();
-//	cout << "Dequeue :" << sv->name << endl;
-//	cout << "-----------------After Dequeue----------------" << endl;
-//	queue->printQueue();
-//	*sv = queue->deQueue();
-//	cout << "Dequeue :" << sv->name << endl;
-//	cout << "-----------------After Dequeue----------------" << endl;
-//	queue->printQueue();
-//	*sv = queue->deQueue();
-//	cout << "Dequeue :" << sv->name << endl;
-//	cout << "-----------------After Dequeue----------------" << endl;
-//	queue->printQueue();
 
-
+	cout << "-----------------Before Dequeue----------------" << endl;
+	queue->printQueue();
+	*sv=queue->deQueue();
+	cout << "Dequeue :" << sv->name << endl;
+	cout << "-----------------After Dequeue----------------" << endl;
+	queue->printQueue();
+	*sv = queue->deQueue();
+	cout << "Dequeue :" << sv->name << endl;
+	cout << "-----------------After Dequeue----------------" << endl;
+	queue->printQueue();
+	*sv = queue->deQueue();
+	cout << "Dequeue :" << sv->name << endl;
+	cout << "-----------------After Dequeue----------------" << endl;
+	queue->printQueue();
 
 	/* -----------------------------------  /
 	/  --------Binary Search Tree---------  /
 	/  ----------------------------------- */
 
-
-
-
+	binaryTree->createTree(*tree);
+	binaryTree->addNode(*tree, 44);binaryTree->addNode(*tree, 18);binaryTree->addNode(*tree, 13);
+	binaryTree->addNode(*tree, 15);binaryTree->addNode(*tree, 37);binaryTree->addNode(*tree, 23);
+	binaryTree->addNode(*tree, 40);binaryTree->addNode(*tree, 88);binaryTree->addNode(*tree, 59);
+	binaryTree->addNode(*tree, 108);binaryTree->addNode(*tree, 55);binaryTree->addNode(*tree, 73);binaryTree->addNode(*tree, 50);
+	Tree *treeNode=binaryTree->searchTreeNode(tree, 55);
+	int count = binaryTree->countNode(tree);
 	return 0;
 }
