@@ -459,7 +459,32 @@ public:
 		}
 	}
 
+	void InsertionSort(int array[], int n){
+		int pos, i, tmp;
+		for (i = 1; i < n; i++){
+			tmp = array[i];
+			pos = i - 1;
+			while (pos >= 0 && array[pos]>tmp){
+				array[pos + 1] = array[pos];
+				pos--;
+			}
+			array[pos + 1] = tmp;
+		}
+	}
 
+	void BinaryInsertionSort(int array[], int n){
+		int left, mid, right, i, tmp;
+		for (i = 1; i < n; i++){
+			tmp = array[i];
+			left = 1;
+			right = n - 1;
+			while (i <= right){
+				mid = (left + right) / 2;
+				if (tmp < array[mid]) right = mid - 1;
+				else left = mid + 1;
+			}
+		}
+	}
 	void printArray(int array[], int size){
 		int i = 0;
 		cout << "Array : ";
@@ -484,7 +509,13 @@ public:
 };
 
 int main(){
-
+	int test;
+	std::string data;
+	cout << " Enter number :"; cin >> test; cout << endl;
+	while (test > 0)	{
+		cout << "Enter String :"; cin >> data;
+		test--;
+	}
 	int array[30];
 	srand(time(nullptr));
 
