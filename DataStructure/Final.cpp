@@ -227,7 +227,7 @@ public:
 	TS searchList(std::string hoten){
 		if (isEmpty()) exit(1);
 		NodeTS *tmp = list->pHead;
-		while (tmp->ts.hoten != hoten){
+		while (tmp->ts.hoten != hoten && tmp){
 			tmp = tmp->pNext;
 		}
 		return tmp->ts;
@@ -369,7 +369,9 @@ class BinaryTree{
 		}
 
 		void deleteTreeNode(Tree &tree, int x){
-
+			if (tree.x != NULL){
+				
+			}
 		}
 
 		Tree* searchTreeNode(Tree *tree, int x){
@@ -485,6 +487,7 @@ public:
 			}
 		}
 	}
+
 	void printArray(int array[], int size){
 		int i = 0;
 		cout << "Array : ";
