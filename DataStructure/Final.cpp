@@ -512,6 +512,11 @@ public:
 };
 
 int main(){
+
+	int i = 10;
+
+	i = i-- + --i;
+	printf("%d", i);
 	int test;
 	std::string data;
 	cout << " Enter number :"; cin >> test; cout << endl;
