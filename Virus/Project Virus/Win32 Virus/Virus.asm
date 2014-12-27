@@ -340,17 +340,17 @@ is_it_kernel32: 				; check is it kernel32.dll
 	mov ebx,dword ptr [eax]		; set ebx=[eax]
 	add ebx,esi				; add image_base
 	cmp dword ptr[ebx],"nrek"	; cmp with Kern
-	jne az1				; if not equal jmp to az1
+	jne ker1				; if not equal jmp to az1
 	inc ecx				; else ecx+=1
-az1:		
+ker1:		
 	cmp dword ptr[ebx+4],"23le"	; mov to next 4 bit then cmp with "el32"
-	jne az2				; if not jmp to az2
+	jne ker2				; if not jmp to az2
 	inc ecx				; else ecx+=1
-az2:	
+ker2:	
 	cmp dword ptr[ebx+8],"lld."	;
 	jne az3				;
 	inc ecx				; else ecx+=1
-az3:	
+ker3:	
 ret
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;------------------- Get Address of GetProcAddress API-------------------------------------;
