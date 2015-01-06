@@ -400,10 +400,50 @@ class BinaryTree{
 			return count;
 		}
 
+		void printNodeAtPosition(Tree *tree,int count,int position){
+			Tree *root = tree;
+			int tmp=count;
+			if (count == position ){
+				cout<< root->x << " " ;
+			}
+			if (root->leftNode != NULL && count < position){
+				count++;
+				printNodeAtPosition(root->leftNode, count, position);
+			}
+			count = tmp;
+			if (root->rightNode != NULL && count < position){
+				count++;
+				printNodeAtPosition(root->rightNode, count, position);
+			}
+		}
+
 		bool isEmpty(Tree *tree) {
 			return tree == NULL ? true : false;
 		}
 
+};
+
+class AVLTree{
+
+	void insertNode(Tree &tree,int x){
+
+	}
+
+	void rotateLL(Tree &tree){
+
+	}
+
+	void rotateRR(Tree &tree){
+
+	}
+
+	void rotateLR(Tree &tree){
+
+	}
+
+	void rotateRL(Tree &tree){
+
+	}
 };
 
 class SearchAndSort{
@@ -513,31 +553,30 @@ public:
 
 int main(){
 
-	int i = 10;
+	//int i = 10;
 
-	i = i-- + --i;
-	printf("%d", i);
-	int test;
-	std::string data;
-	cout << " Enter number :"; cin >> test; cout << endl;
-	while (test > 0)	{
-		cout << "Enter String :"; cin >> data;
-		test--;
-	}
-	int array[30];
-	srand(time(nullptr));
+	//i = i-- + --i;
+	//printf("%d", i);
+	//int test;
+	//std::string data;
+	//cout << " Enter number :"; cin >> test; cout << endl;
+	//while (test > 0)	{
+	//	cout << "Enter String :"; cin >> data;
+	//	test--;
+	//}
+	//int array[30];
+	//srand(time(nullptr));
 
-	/* Data Structure*/
-	SV *sv = new SV;
-	TS *ts = new TS;
-	Tree *tree = new Tree;
+	///* Data Structure*/
+	//SV *sv = new SV;
+	//TS *ts = new TS;
+	//Tree *tree = new Tree;
 
 	/* Class */
-	LinkedList *list = new LinkedList;
+	/*LinkedList *list = new LinkedList;
 	Stack *stack = new Stack;
 	Queue *queue = new Queue;
 	SearchAndSort *search_and_sort = new SearchAndSort;
-	BinaryTree *binaryTree = new BinaryTree;
 
 
 	for (int i = 1; i < 4; i++){
@@ -559,71 +598,73 @@ int main(){
 		ts->diem = rand() % 10 + 1;
 		ts->ngaysinh = "1/1/1993";
 		list->addHead(*ts);
-	}
+	}*/
 
 
 	/* -----------------------------------  /
 	/  ---------Search and sort-----------  /
 	/  ----------------------------------- */
-
-	search_and_sort->createRandomArray(array, 30);
-	search_and_sort->printArray(array, 30);
-	search_and_sort->interchangeSort(array, 30);
-//	search_and_sort->selectionSort(array, 30);
-	search_and_sort->bubbleSort(array, 30);
-	search_and_sort->printArray(array, 30);
-
-	/* -----------------------------------  /
-	/  ------------Linked list------------  /
-	/  ----------------------------------- */
-
-	cout << "-----------------Before Sort----------------" << endl;
-	list->printList();
-	list->selectionSort();
-	cout << "-----------------After Sort----------------" << endl;
-	list->printList();
-
-	/* -----------------------------------  /
-	/  ---------------Stack---------------  /
-	/  ----------------------------------- */
-	cout << "-----------------Before POP----------------" << endl;
-	stack->printStack();
-	*sv = stack->pop();
-	cout << "Pop :" << sv->name << endl;
-	cout << "-----------------After POP----------------" << endl;
-	stack->printStack();
-	*sv = stack->pop();
-	cout << "Pop :" << sv->name << endl;
-	cout << "-----------------After POP----------------" << endl;
-	stack->printStack();
-	*sv = stack->pop();
-	cout << "Pop :" << sv->name << endl;
-	cout << "-----------------After POP----------------" << endl;
-	stack->printStack();
-
-	/* -----------------------------------  /
-	/  ---------------Queue---------------  /
-	/  ----------------------------------- */
-
-	cout << "-----------------Before Dequeue----------------" << endl;
-	queue->printQueue();
-	*sv=queue->deQueue();
-	cout << "Dequeue :" << sv->name << endl;
-	cout << "-----------------After Dequeue----------------" << endl;
-	queue->printQueue();
-	*sv = queue->deQueue();
-	cout << "Dequeue :" << sv->name << endl;
-	cout << "-----------------After Dequeue----------------" << endl;
-	queue->printQueue();
-	*sv = queue->deQueue();
-	cout << "Dequeue :" << sv->name << endl;
-	cout << "-----------------After Dequeue----------------" << endl;
-	queue->printQueue();
-
+//
+//	search_and_sort->createRandomArray(array, 30);
+//	search_and_sort->printArray(array, 30);
+//	search_and_sort->interchangeSort(array, 30);
+////	search_and_sort->selectionSort(array, 30);
+//	search_and_sort->bubbleSort(array, 30);
+//	search_and_sort->printArray(array, 30);
+//
+//	/* -----------------------------------  /
+//	/  ------------Linked list------------  /
+//	/  ----------------------------------- */
+//
+//	cout << "-----------------Before Sort----------------" << endl;
+//	list->printList();
+//	list->selectionSort();
+//	cout << "-----------------After Sort----------------" << endl;
+//	list->printList();
+//
+//	/* -----------------------------------  /
+//	/  ---------------Stack---------------  /
+//	/  ----------------------------------- */
+//	cout << "-----------------Before POP----------------" << endl;
+//	stack->printStack();
+//	*sv = stack->pop();
+//	cout << "Pop :" << sv->name << endl;
+//	cout << "-----------------After POP----------------" << endl;
+//	stack->printStack();
+//	*sv = stack->pop();
+//	cout << "Pop :" << sv->name << endl;
+//	cout << "-----------------After POP----------------" << endl;
+//	stack->printStack();
+//	*sv = stack->pop();
+//	cout << "Pop :" << sv->name << endl;
+//	cout << "-----------------After POP----------------" << endl;
+//	stack->printStack();
+//
+//	/* -----------------------------------  /
+//	/  ---------------Queue---------------  /
+//	/  ----------------------------------- */
+//
+//	cout << "-----------------Before Dequeue----------------" << endl;
+//	queue->printQueue();
+//	*sv=queue->deQueue();
+//	cout << "Dequeue :" << sv->name << endl;
+//	cout << "-----------------After Dequeue----------------" << endl;
+//	queue->printQueue();
+//	*sv = queue->deQueue();
+//	cout << "Dequeue :" << sv->name << endl;
+//	cout << "-----------------After Dequeue----------------" << endl;
+//	queue->printQueue();
+//	*sv = queue->deQueue();
+//	cout << "Dequeue :" << sv->name << endl;
+//	cout << "-----------------After Dequeue----------------" << endl;
+//	queue->printQueue();
+//
 	/* -----------------------------------  /
 	/  --------Binary Search Tree---------  /
 	/  ----------------------------------- */
 
+	BinaryTree *binaryTree = new BinaryTree;
+	Tree *tree = new Tree;
 	binaryTree->createTree(*tree);
 	binaryTree->addNode(*tree, 44);binaryTree->addNode(*tree, 18);binaryTree->addNode(*tree, 13);
 	binaryTree->addNode(*tree, 15);binaryTree->addNode(*tree, 37);binaryTree->addNode(*tree, 23);
@@ -631,5 +672,6 @@ int main(){
 	binaryTree->addNode(*tree, 108);binaryTree->addNode(*tree, 55);binaryTree->addNode(*tree, 73);binaryTree->addNode(*tree, 50);
 	Tree *treeNode=binaryTree->searchTreeNode(tree, 55);
 	int count = binaryTree->countNode(tree);
+	binaryTree->printNodeAtPosition(tree, 0, 2);
 	return 0;
 }
