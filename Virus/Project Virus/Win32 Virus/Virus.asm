@@ -14,8 +14,8 @@ FindFirstFileError              		BYTE                        "FindFirstFile fai
 FindFirstFileSuccess            		BYTE                        "First file found with success ", 0
 FindNextFileError               		BYTE                        "FindNextFile failed ", 0
 FindNextFileSuccess             		BYTE                        "FirstNextFile found with success ", 0
-FolderFound           		  		BYTE                        "Folder found", 0
-PATH					            db			          "C:\Documents and Settings\Administrator\Desktop\virus\",0
+FolderFound           		  		    BYTE                        "Folder found", 0
+PATH					                db			                "C:\Documents and Settings\Administrator\Desktop\virus\",0
 .code
 ; ------------------------------------------------------------------------------------------------------------------;
 virusCode:
